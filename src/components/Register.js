@@ -1,8 +1,16 @@
 import React, { useContext } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  TextInput,
+} from 'react-native';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import { Input, Button } from 'react-native-elements';
+import { Button } from 'react-native-elements';
 
 import { Context } from '../context';
 
@@ -30,98 +38,129 @@ export default function Register({ navigation }) {
             password: '',
             passwordConfirmation: '',
           }}
-          onSubmit={(values, { resetForm }) => {
+          validateOnChange={false}
+          validateOnBlur={false}
+          onSubmit={(values, { resetForm, validate }) => {
+            validate(values);
             register(values);
             resetForm();
           }}
-          validationSchema={Yup.object({
-            idNumber: Yup.number().required(),
-            name: Yup.string().required(),
-            email: Yup.string().email().required(),
-            phone: Yup.string().required().min(11).max(13),
-            password: Yup.string().required().min(8),
-            passwordConfirmation: Yup.string().oneOf(
-              [Yup.ref('password'), null],
-              'passwords must match'
-            ),
+          validationSchema={Yup.object().shape({
+            idNumber: Yup.number().required('ID Number cannot be empty'),
+            name: Yup.string().required('Name cannot be empty'),
+            email: Yup.string()
+              .email('Please insert a valid email')
+              .required('Email cannot be empty'),
+            phone: Yup.string()
+              .required('Phone number cannot be empty')
+              .min(11, 'Minimal 11 numbers')
+              .max(13, 'Maximal 13 numbers'),
+            password: Yup.string()
+              .required('Password cannot be empty')
+              .min(8, 'Minimal 8 characters'),
+            passwordConfirmation: Yup.string()
+              .required('Password confirmation cannot be empty')
+              .test(
+                'passwords-match',
+                'passwords must match',
+                function (value) {
+                  return this.parent.password == value;
+                }
+              ),
           })}
         >
           {({
             handleChange,
-            handleBlur,
             handleSubmit,
             values,
-            touched,
             errors,
+            setFieldTouched,
+            isValid,
+            touched,
           }) => (
             <>
-              <Text style={styles.label}>ID Number</Text>
-              <Input
-                onChange={handleChange('idNumber')}
-                onBlur={handleBlur('idNumber')}
-                value={values.idNumber}
-                errorMessage={errors.idNumber}
-                renderErrorMessage={errors.idNumber && touched.idNumber}
-                style={styles.input}
-                underlineColorAndroid="transparent"
-              ></Input>
-              <Text style={styles.label}>Name</Text>
-              <Input
-                onChange={handleChange('name')}
-                onBlur={handleBlur('name')}
-                value={values.name}
-                errorMessage={errors.name}
-                renderErrorMessage={errors.name && touched.name}
-                style={styles.input}
-                underlineColorAndroid="transparent"
-              ></Input>
-              <Text style={styles.label}>Email</Text>
-              <Input
-                onChange={handleChange('email')}
-                onBlur={handleBlur('email')}
-                value={values.email}
-                errorMessage={errors.email}
-                renderErrorMessage={errors.email && touched.email}
-                style={styles.input}
-                underlineColorAndroid="transparent"
-              ></Input>
-              <Text style={styles.label}>Phone</Text>
-              <Input
-                onChange={handleChange('phone')}
-                onBlur={handleBlur('phone')}
-                value={values.phone}
-                errorMessage={errors.phone}
-                renderErrorMessage={errors.phone && touched.phone}
-                style={styles.input}
-                underlineColorAndroid="transparent"
-              ></Input>
-              <Text style={styles.label}>Password</Text>
-              <Input
-                onChange={handleChange('password')}
-                onBlur={handleBlur('password')}
-                value={values.password}
-                errorMessage={errors.password}
-                renderErrorMessage={errors.password && touched.password}
-                style={styles.input}
-                underlineColorAndroid="transparent"
-                secureTextEntry={true}
-              ></Input>
-              <Text style={styles.label}>Password Confirmation</Text>
-              <Input
-                onChange={handleChange('passwordConfirmation')}
-                onBlur={handleBlur('passwordConfirmation')}
-                value={values.passwordConfirmation}
-                errorMessage={errors.passwordConfirmation}
-                secureTextEntry={true}
-                renderErrorMessage={
-                  errors.passwordConfirmation && touched.passwordConfirmation
-                }
-                style={styles.input}
-                underlineColorAndroid="transparent"
-              ></Input>
+              <ScrollView showsVerticalScrollIndicator={false}>
+                <Text style={styles.label}>ID Number</Text>
+                <TextInput
+                  value={values.idNumber}
+                  onChangeText={handleChange('idNumber')}
+                  onBlur={() => setFieldTouched('idNumber')}
+                  style={styles.input}
+                  autoFocus={true}
+                />
+                {touched.idNumber && errors.idNumber && (
+                  <Text style={{ fontSize: 10, color: 'red' }}>
+                    {errors.idNumber}
+                  </Text>
+                )}
+                <Text style={styles.label}>Name</Text>
+                <TextInput
+                  value={values.name}
+                  onChangeText={handleChange('name')}
+                  onBlur={() => setFieldTouched('name')}
+                  style={styles.input}
+                />
+                {touched.name && errors.name && (
+                  <Text style={{ fontSize: 10, color: 'red' }}>
+                    {errors.name}
+                  </Text>
+                )}
+                <Text style={styles.label}>Email</Text>
+                <TextInput
+                  value={values.email}
+                  onChangeText={handleChange('email')}
+                  onBlur={() => setFieldTouched('email')}
+                  style={styles.input}
+                />
+                {touched.email && errors.email && (
+                  <Text style={{ fontSize: 10, color: 'red' }}>
+                    {errors.email}
+                  </Text>
+                )}
+                <Text style={styles.label}>Phone</Text>
+                <TextInput
+                  value={values.phone}
+                  onChangeText={handleChange('phone')}
+                  onBlur={() => setFieldTouched('phone')}
+                  style={styles.input}
+                />
+                {touched.phone && errors.phone && (
+                  <Text style={{ fontSize: 10, color: 'red' }}>
+                    {errors.phone}
+                  </Text>
+                )}
+                <Text style={styles.label}>Password</Text>
+                <TextInput
+                  value={values.password}
+                  onChangeText={handleChange('password')}
+                  onBlur={() => setFieldTouched('password')}
+                  style={styles.input}
+                  secureTextEntry={true}
+                />
+                {touched.password && errors.password && (
+                  <Text style={{ fontSize: 10, color: 'red' }}>
+                    {errors.password}
+                  </Text>
+                )}
+                <Text style={styles.label}>Password Confirmation</Text>
+                <TextInput
+                  value={values.passwordConfirmation}
+                  onChangeText={handleChange('passwordConfirmation')}
+                  onBlur={() => setFieldTouched('passwordConfirmation')}
+                  style={styles.input}
+                  secureTextEntry={true}
+                />
+                {touched.passwordConfirmation &&
+                  errors.passwordConfirmation && (
+                    <Text style={{ fontSize: 10, color: 'red' }}>
+                      {errors.passwordConfirmation}
+                    </Text>
+                  )}
+              </ScrollView>
               <Button
                 onPress={handleSubmit}
                 title="Sign Up"
+                disabled={!isValid}
                 buttonStyle={[styles.button, styles.signUpButton]}
                 titleStyle={styles.signUpButtonText}
               ></Button>
@@ -147,7 +186,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   level: {
-    width: 275,
+    width: 300,
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
@@ -178,7 +217,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Roboto-Bold',
     fontSize: 18,
     alignSelf: 'flex-start',
-    marginLeft: 25,
     marginTop: 25,
     textTransform: 'uppercase',
     letterSpacing: 3,
@@ -189,9 +227,10 @@ const styles = StyleSheet.create({
     marginTop: 15,
     borderRadius: 5,
     padding: 10,
+    width: 300,
   },
   button: {
-    width: 275,
+    width: 300,
     marginTop: 25,
   },
   signUpButton: {

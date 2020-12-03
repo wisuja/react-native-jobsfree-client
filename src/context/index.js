@@ -20,7 +20,6 @@ class Provider extends Component {
   };
 
   register = (values) => {
-    console.log(values);
     // axios
     //   .post(`${this.state.url}/login`, {
     //     email,

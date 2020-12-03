@@ -1,8 +1,8 @@
 import React, { useContext } from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, TextInput } from 'react-native';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import { Input, Button } from 'react-native-elements';
+import { Button } from 'react-native-elements';
 
 import { Context } from '../context';
 
@@ -23,48 +23,61 @@ export default function Login({ navigation }) {
             email: '',
             password: '',
           }}
-          onSubmit={(values, { resetForm }) => {
+          validateOnBlur={false}
+          validateOnChange={false}
+          onSubmit={(values, { resetForm, validate }) => {
+            validate(values);
             login(values);
             resetForm();
           }}
           validationSchema={Yup.object({
-            email: Yup.string().email().required(),
-            password: Yup.string().required(),
+            email: Yup.string()
+              .email('Please insert a valid email')
+              .required('Email cannot be empty'),
+            password: Yup.string()
+              .required('Password cannot be empty')
+              .min(8, 'Minimal 8 characters'),
           })}
         >
           {({
             handleChange,
-            handleBlur,
             handleSubmit,
             values,
-            touched,
             errors,
+            setFieldTouched,
+            touched,
+            isValid,
           }) => (
             <>
-              <Text style={styles.label}>email</Text>
-              <Input
-                onChange={handleChange('email')}
-                onBlur={handleBlur('email')}
+              <Text style={styles.label}>Email</Text>
+              <TextInput
                 value={values.email}
-                errorMessage={errors.email}
-                renderErrorMessage={errors.email && touched.email}
+                autoFocus={true}
+                onChangeText={handleChange('email')}
+                onBlur={() => setFieldTouched('email')}
                 style={styles.input}
-                underlineColorAndroid="transparent"
-              ></Input>
+              />
+              {touched.email && errors.email && (
+                <Text style={{ fontSize: 10, color: 'red' }}>
+                  {errors.email}
+                </Text>
+              )}
               <Text style={styles.label}>Password</Text>
-              <Input
-                onChange={handleChange('password')}
-                onBlur={handleBlur('password')}
+              <TextInput
                 value={values.password}
-                errorMessage={errors.password}
-                renderErrorMessage={errors.password && touched.password}
-                secureTextEntry={true}
+                onChangeText={handleChange('password')}
+                onBlur={() => setFieldTouched('password')}
                 style={styles.input}
-                underlineColorAndroid="transparent"
-              ></Input>
+              />
+              {touched.password && errors.password && (
+                <Text style={{ fontSize: 10, color: 'red' }}>
+                  {errors.password}
+                </Text>
+              )}
               <Button
                 onPress={handleSubmit}
                 title="Sign In"
+                disabled={!isValid}
                 buttonStyle={[styles.button, styles.signInButton]}
                 titleStyle={styles.signInButtonText}
               ></Button>
@@ -113,7 +126,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   level: {
-    width: 275,
+    width: 300,
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
@@ -128,7 +141,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Roboto-Bold',
     fontSize: 18,
     alignSelf: 'flex-start',
-    marginLeft: 25,
     marginTop: 25,
     textTransform: 'uppercase',
     letterSpacing: 3,
@@ -139,9 +151,10 @@ const styles = StyleSheet.create({
     marginTop: 15,
     borderRadius: 5,
     padding: 10,
+    width: 300,
   },
   button: {
-    width: 275,
+    width: 300,
     marginTop: 25,
   },
   signInButton: {
@@ -164,7 +177,7 @@ const styles = StyleSheet.create({
   copyright: {
     fontFamily: 'Roboto-Bold',
     fontSize: 12,
-    marginTop: 'auto',
+    marginTop: 50,
     marginBottom: 20,
   },
 });
