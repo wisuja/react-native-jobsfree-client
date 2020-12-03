@@ -1,0 +1,12 @@
+{
+  "name": "jobsfree",
+  "displayName": "jobsfree",
+  "expo": {
+    "name": "jobsfree",
+    "slug": "jobsfree",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
