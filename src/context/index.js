@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import { Form } from 'formik';
 
 const Context = React.createContext();
 class Provider extends Component {
@@ -8,6 +7,14 @@ class Provider extends Component {
     url: 'https://tes.dumdumbros.com',
     error: {
       message: '',
+    },
+    user: {
+      name: '',
+      email: '',
+      phone_no: '',
+      isLogin: false,
+      photo: '',
+      isBuyer: false,
     },
   };
 
@@ -18,7 +25,20 @@ class Provider extends Component {
 
     axios
       .post(`${this.state.url}/login`, data)
-      .then((response) => console.log(response.data))
+      .then(({ status, data: { name, email, phone_no, photo, role_id } }) => {
+        if (status == 200) {
+          this.setState((previousState) => ({
+            user: {
+              name: name,
+              email: email,
+              phone_no: phone_no,
+              isLogin: true,
+              photo: photo,
+              isBuyer: role_id == 1 ? true : false,
+            },
+          }));
+        }
+      })
       .catch(
         ({
           response: {
@@ -47,7 +67,20 @@ class Provider extends Component {
 
     axios
       .post(`${this.state.url}/signup`, data)
-      .then((response) => console.log(response))
+      .then(({ status, data: { name, email, phone_no, photo, role_id } }) => {
+        if (status == 200) {
+          this.setState((previousState) => ({
+            user: {
+              name: name,
+              email: email,
+              phone_no: phone_no,
+              isLogin: true,
+              photo: photo,
+              isBuyer: role_id == 1 ? true : false,
+            },
+          }));
+        }
+      })
       .catch((error) => console.error(error));
   };
 
