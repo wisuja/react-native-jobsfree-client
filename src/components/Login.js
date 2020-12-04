@@ -1,20 +1,28 @@
 import React, { useContext } from 'react';
-import { View, Text, StyleSheet, Image, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TextInput, ScrollView } from 'react-native';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { Button } from 'react-native-elements';
 
 import { Context } from '../context';
 
+import Logo from './Logo';
+
 export default function Login({ navigation }) {
-  const { login } = useContext(Context);
+  const {
+    login,
+    state: {
+      error: { message },
+    },
+  } = useContext(Context);
 
   return (
     <View style={styles.container}>
-      <View>
-        <Image style={styles.logo} source={require('../assets/img/logo.png')} />
-      </View>
-      <View style={styles.formContainer}>
+      <Logo />
+      <ScrollView
+        style={styles.formContainer}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.level}>
           <Text style={styles.link}>Sign In</Text>
         </View>
@@ -23,20 +31,13 @@ export default function Login({ navigation }) {
             email: '',
             password: '',
           }}
-          validateOnBlur={false}
-          validateOnChange={false}
-          onSubmit={(values, { resetForm, validate }) => {
-            validate(values);
+          onSubmit={(values, { resetForm }) => {
             login(values);
             resetForm();
           }}
           validationSchema={Yup.object({
-            email: Yup.string()
-              .email('Please insert a valid email')
-              .required('Email cannot be empty'),
-            password: Yup.string()
-              .required('Password cannot be empty')
-              .min(8, 'Minimal 8 characters'),
+            email: Yup.string().required('Email cannot be empty'),
+            password: Yup.string().required('Password cannot be empty'),
           })}
         >
           {({
@@ -49,31 +50,43 @@ export default function Login({ navigation }) {
             isValid,
           }) => (
             <>
-              <Text style={styles.label}>Email</Text>
-              <TextInput
-                value={values.email}
-                autoFocus={true}
-                onChangeText={handleChange('email')}
-                onBlur={() => setFieldTouched('email')}
-                style={styles.input}
-              />
-              {touched.email && errors.email && (
-                <Text style={{ fontSize: 10, color: 'red' }}>
-                  {errors.email}
-                </Text>
+              {message ? (
+                <View style={styles.errorContainer}>
+                  <Text style={styles.errorMessage}>{message}</Text>
+                </View>
+              ) : (
+                []
               )}
-              <Text style={styles.label}>Password</Text>
-              <TextInput
-                value={values.password}
-                onChangeText={handleChange('password')}
-                onBlur={() => setFieldTouched('password')}
-                style={styles.input}
-              />
-              {touched.password && errors.password && (
-                <Text style={{ fontSize: 10, color: 'red' }}>
-                  {errors.password}
-                </Text>
-              )}
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Email</Text>
+                <TextInput
+                  value={values.email}
+                  autoFocus={true}
+                  onChangeText={handleChange('email')}
+                  onBlur={() => setFieldTouched('email')}
+                  style={styles.input}
+                />
+                {touched.email && errors.email && (
+                  <Text style={{ fontSize: 10, color: 'red' }}>
+                    {errors.email}
+                  </Text>
+                )}
+              </View>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Password</Text>
+                <TextInput
+                  value={values.password}
+                  onChangeText={handleChange('password')}
+                  onBlur={() => setFieldTouched('password')}
+                  secureTextEntry={true}
+                  style={styles.input}
+                />
+                {touched.password && errors.password && (
+                  <Text style={{ fontSize: 10, color: 'red' }}>
+                    {errors.password}
+                  </Text>
+                )}
+              </View>
               <Button
                 onPress={handleSubmit}
                 title="Sign In"
@@ -92,7 +105,7 @@ export default function Login({ navigation }) {
         ></Button>
 
         <Text style={styles.copyright}>Copyright 2020 &copy; Jobsfree</Text>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -104,16 +117,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  logo: {
-    width: 200,
-    height: 200,
-    resizeMode: 'contain',
-  },
   formContainer: {
     flex: 2,
     backgroundColor: '#fff',
-    alignSelf: 'stretch',
-    alignItems: 'center',
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
     shadowOffset: {
@@ -130,6 +136,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
+  inputContainer: {
+    marginBottom: 25,
+  },
   link: {
     fontFamily: 'Roboto-Regular',
     alignSelf: 'flex-start',
@@ -141,7 +150,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Roboto-Bold',
     fontSize: 18,
     alignSelf: 'flex-start',
-    marginTop: 25,
     textTransform: 'uppercase',
     letterSpacing: 3,
     color: '#333',
@@ -179,5 +187,19 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 50,
     marginBottom: 20,
+    textAlign: 'center',
+  },
+  errorContainer: {
+    backgroundColor: '#ffb0bd',
+    padding: 10,
+    marginTop: -15,
+    marginBottom: 10,
+    borderRadius: 5,
+    alignSelf: 'stretch',
+  },
+  errorMessage: {
+    textTransform: 'uppercase',
+    fontFamily: 'Roboto-Bold',
+    textAlign: 'center',
   },
 });

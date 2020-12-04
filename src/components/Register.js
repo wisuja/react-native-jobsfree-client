@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ScrollView,
   TextInput,
+  Switch,
 } from 'react-native';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
@@ -14,15 +15,18 @@ import { Button } from 'react-native-elements';
 
 import { Context } from '../context';
 
+import Logo from './Logo';
+
 export default function Register({ navigation }) {
-  const { register } = useContext(Context);
+  const { register, message } = useContext(Context);
 
   return (
     <View style={styles.container}>
-      <View>
-        <Image style={styles.logo} source={require('../assets/img/logo.png')} />
-      </View>
-      <View style={styles.formContainer}>
+      <Logo />
+      <ScrollView
+        style={styles.formContainer}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.level}>
           <Text style={styles.link}>Sign Up</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Login')}>
@@ -37,11 +41,9 @@ export default function Register({ navigation }) {
             phone: '',
             password: '',
             passwordConfirmation: '',
+            isBuyer: false,
           }}
-          validateOnChange={false}
-          validateOnBlur={false}
-          onSubmit={(values, { resetForm, validate }) => {
-            validate(values);
+          onSubmit={(values, { resetForm }) => {
             register(values);
             resetForm();
           }}
@@ -77,9 +79,26 @@ export default function Register({ navigation }) {
             setFieldTouched,
             isValid,
             touched,
+            setFieldValue,
           }) => (
             <>
-              <ScrollView showsVerticalScrollIndicator={false}>
+              {message && (
+                <View style={styles.errorContainer}>
+                  <Text style={styles.errorMessage}>{message}</Text>
+                </View>
+              )}
+              <View style={[styles.level, styles.inputContainer]}>
+                <Text style={styles.label}>
+                  {values.isBuyer ? 'Buyer' : 'Seller'}
+                </Text>
+                <Switch
+                  trackColor={{ false: '#333', true: '#c7ffd6' }}
+                  ios_backgroundColor="#3e3e3e"
+                  onValueChange={(value) => setFieldValue('isBuyer', value)}
+                  value={values.isBuyer}
+                />
+              </View>
+              <View style={styles.inputContainer}>
                 <Text style={styles.label}>ID Number</Text>
                 <TextInput
                   value={values.idNumber}
@@ -93,6 +112,8 @@ export default function Register({ navigation }) {
                     {errors.idNumber}
                   </Text>
                 )}
+              </View>
+              <View style={styles.inputContainer}>
                 <Text style={styles.label}>Name</Text>
                 <TextInput
                   value={values.name}
@@ -105,6 +126,8 @@ export default function Register({ navigation }) {
                     {errors.name}
                   </Text>
                 )}
+              </View>
+              <View style={styles.inputContainer}>
                 <Text style={styles.label}>Email</Text>
                 <TextInput
                   value={values.email}
@@ -117,6 +140,8 @@ export default function Register({ navigation }) {
                     {errors.email}
                   </Text>
                 )}
+              </View>
+              <View style={styles.inputContainer}>
                 <Text style={styles.label}>Phone</Text>
                 <TextInput
                   value={values.phone}
@@ -129,6 +154,8 @@ export default function Register({ navigation }) {
                     {errors.phone}
                   </Text>
                 )}
+              </View>
+              <View style={styles.inputContainer}>
                 <Text style={styles.label}>Password</Text>
                 <TextInput
                   value={values.password}
@@ -142,6 +169,8 @@ export default function Register({ navigation }) {
                     {errors.password}
                   </Text>
                 )}
+              </View>
+              <View style={styles.inputContainer}>
                 <Text style={styles.label}>Password Confirmation</Text>
                 <TextInput
                   value={values.passwordConfirmation}
@@ -156,7 +185,7 @@ export default function Register({ navigation }) {
                       {errors.passwordConfirmation}
                     </Text>
                   )}
-              </ScrollView>
+              </View>
               <Button
                 onPress={handleSubmit}
                 title="Sign Up"
@@ -168,7 +197,7 @@ export default function Register({ navigation }) {
           )}
         </Formik>
         <Text style={styles.copyright}>Copyright 2020 &copy; Jobsfree</Text>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -180,11 +209,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  logo: {
-    width: 200,
-    height: 200,
-    resizeMode: 'contain',
-  },
   level: {
     width: 300,
     flexDirection: 'row',
@@ -193,8 +217,6 @@ const styles = StyleSheet.create({
   formContainer: {
     flex: 2,
     backgroundColor: '#fff',
-    alignSelf: 'stretch',
-    alignItems: 'center',
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
     shadowOffset: {
@@ -213,11 +235,13 @@ const styles = StyleSheet.create({
     marginBottom: 25,
     textTransform: 'uppercase',
   },
+  inputContainer: {
+    marginBottom: 25,
+  },
   label: {
     fontFamily: 'Roboto-Bold',
     fontSize: 18,
     alignSelf: 'flex-start',
-    marginTop: 25,
     textTransform: 'uppercase',
     letterSpacing: 3,
     color: '#333',
@@ -247,5 +271,19 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 50,
     marginBottom: 20,
+    textAlign: 'center',
+  },
+  errorContainer: {
+    backgroundColor: '#ffb0bd',
+    padding: 10,
+    marginTop: -15,
+    marginBottom: 10,
+    borderRadius: 5,
+    alignSelf: 'stretch',
+  },
+  errorMessage: {
+    textTransform: 'uppercase',
+    fontFamily: 'Roboto-Bold',
+    textAlign: 'center',
   },
 });
