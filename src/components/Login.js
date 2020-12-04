@@ -1,20 +1,25 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, ScrollView } from 'react-native';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { Button } from 'react-native-elements';
 
-import { Context } from '../context';
+import { Context } from '../../context';
 
-import Logo from './Logo';
+import Logo from '../../utils/Logo';
 
 export default function Login({ navigation }) {
   const {
     login,
     state: {
+      user,
       error: { message },
     },
   } = useContext(Context);
+
+  useEffect(() => {
+    if (user.isLoggedIn) navigation.navigate('Home');
+  }, [user.isLoggedIn]);
 
   return (
     <View style={styles.container}>

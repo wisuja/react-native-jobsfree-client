@@ -13,9 +13,9 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { Button } from 'react-native-elements';
 
-import { Context } from '../context';
+import { Context } from '../../context';
 
-import Logo from './Logo';
+import Logo from '../../utils/Logo';
 
 export default function Register({ navigation }) {
   const { register, message } = useContext(Context);
