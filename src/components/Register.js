@@ -1,9 +1,8 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  Image,
   TouchableOpacity,
   ScrollView,
   TextInput,
@@ -13,12 +12,16 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { Button } from 'react-native-elements';
 
-import { Context } from '../../context';
+import { Context } from '../context';
 
-import Logo from '../../utils/Logo';
+import Logo from '../utils/Logo';
 
 export default function Register({ navigation }) {
   const { register, message } = useContext(Context);
+
+  useEffect(() => {
+    if (user.isLoggedIn) navigation.navigate('Home');
+  }, [user.isLoggedIn]);
 
   return (
     <View style={styles.container}>

@@ -4,9 +4,9 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { Button } from 'react-native-elements';
 
-import { Context } from '../../context';
+import { Context } from '../context';
 
-import Logo from '../../utils/Logo';
+import Logo from '../utils/Logo';
 
 export default function Login({ navigation }) {
   const {

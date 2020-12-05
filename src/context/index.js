@@ -12,10 +12,11 @@ class Provider extends Component {
       name: '',
       email: '',
       phone_no: '',
-      isLoggedIn: true,
+      isLoggedIn: false,
       photo: '',
       isBuyer: false,
     },
+    cards: [],
   };
 
   login = ({ email, password }) => {
@@ -25,7 +26,7 @@ class Provider extends Component {
 
     axios
       .post(`${this.state.url}/login`, data)
-      .then(({ status, data: { name, email, phone_no, photo, role_id } }) => {
+      .then(({ status, data: { name, email, phone_no, image, role_id } }) => {
         if (status == 200) {
           this.setState((previousState) => ({
             user: {
@@ -33,7 +34,7 @@ class Provider extends Component {
               email: email,
               phone_no: phone_no,
               isLoggedIn: true,
-              photo: photo,
+              photo: image,
               isBuyer: role_id == 1 ? true : false,
             },
           }));
@@ -67,7 +68,7 @@ class Provider extends Component {
 
     axios
       .post(`${this.state.url}/signup`, data)
-      .then(({ status, data: { name, email, phone_no, photo, role_id } }) => {
+      .then(({ status, data: { name, email, phone_no, image, role_id } }) => {
         if (status == 200) {
           this.setState((previousState) => ({
             user: {
@@ -75,13 +76,26 @@ class Provider extends Component {
               email: email,
               phone_no: phone_no,
               isLoggedIn: true,
-              photo: photo,
+              photo: image,
               isBuyer: role_id == 1 ? true : false,
             },
           }));
         }
       })
       .catch((error) => console.error(error));
+  };
+
+  logout = () => {
+    this.setState((previousState) => ({
+      user: {
+        name: '',
+        email: '',
+        phone_no: '',
+        isLoggedIn: false,
+        photo: '',
+        isBuyer: false,
+      },
+    }));
   };
 
   render() {
@@ -92,6 +106,7 @@ class Provider extends Component {
             state: this.state,
             login: this.login,
             register: this.register,
+            logout: this.logout,
           }}
         >
           {this.props.children}
