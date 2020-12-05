@@ -291,11 +291,99 @@ const Orders = () => {
 };
 
 const BuyerOrders = () => {
-  return <Text>Buyer Order</Text>;
+  let data = [
+    {
+      id: 1,
+      title: 'Test',
+    },
+    {
+      id: 2,
+      title: 'Test2',
+    },
+    {
+      id: 3,
+      title: 'Test3',
+    },
+  ];
+
+  const renderCards = ({ title }, index) => {
+    return (
+      <Button
+        buttonStyle={[styles.btnOrder]}
+        titleStyle={styles.textRegular}
+        title={title}
+        key={index}
+      ></Button>
+    );
+  };
+
+  return (
+    <View style={styles.container}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scroll}
+      >
+        <View style={styles.level}>
+          <Text style={[styles.label, styles.coloredText]}>Orders</Text>
+          <Image
+            style={styles.icon}
+            source={require('../assets/img/logo.png')}
+          />
+        </View>
+        <View style={(styles.container, { flexGrow: 2 })}>
+          {data.map((card, index) => renderCards(card, index))}
+        </View>
+      </ScrollView>
+    </View>
+  );
 };
 
 const SellerOrders = () => {
-  return <Text>Seller Order</Text>;
+  let data = [
+    {
+      id: 1,
+      title: 'Test',
+    },
+    {
+      id: 2,
+      title: 'Test2',
+    },
+    {
+      id: 3,
+      title: 'Test3',
+    },
+  ];
+
+  const renderCards = ({ title }, index) => {
+    return (
+      <Button
+        buttonStyle={[styles.btnOrder]}
+        titleStyle={styles.textRegular}
+        title={title}
+        key={index}
+      ></Button>
+    );
+  };
+
+  return (
+    <View style={styles.container}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scroll}
+      >
+        <View style={styles.level}>
+          <Text style={[styles.label, styles.coloredText]}>Orders</Text>
+          <Image
+            style={styles.icon}
+            source={require('../assets/img/logo.png')}
+          />
+        </View>
+        <View style={(styles.container, { flexGrow: 2 })}>
+          {data.map((card, index) => renderCards(card, index))}
+        </View>
+      </ScrollView>
+    </View>
+  );
 };
 
 const Settings = () => {
@@ -465,6 +553,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#3FA578',
     borderRadius: 5,
     marginRight: 10,
+  },
+  btnOrder: {
+    backgroundColor: '#3FA578',
+    borderRadius: 5,
+    marginVertical: 10,
+    marginHorizontal: 30,
+    alignSelf: 'stretch',
+    height: 100,
   },
   textRegular: {
     fontFamily: 'Roboto-Regular',
