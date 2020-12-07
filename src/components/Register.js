@@ -17,7 +17,11 @@ import { Context } from '../context';
 import Logo from '../utils/Logo';
 
 export default function Register({ navigation }) {
-  const { register, message } = useContext(Context);
+  const {
+    register,
+    message,
+    state: { user },
+  } = useContext(Context);
 
   useEffect(() => {
     if (user.isLoggedIn) navigation.navigate('Home');
