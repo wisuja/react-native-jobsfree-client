@@ -15,6 +15,7 @@ import { Button } from 'react-native-elements';
 import { Context } from '../context';
 
 import Logo from '../utils/Logo';
+import OfflineNotice from '../utils/OfflineNotice';
 
 export default function Register({ navigation }) {
   const {
@@ -29,6 +30,7 @@ export default function Register({ navigation }) {
 
   return (
     <View style={styles.container}>
+      <OfflineNotice />
       <Logo />
       <ScrollView
         style={styles.formContainer}

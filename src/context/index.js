@@ -3,6 +3,7 @@ import axios from 'axios';
 import moment from 'moment';
 import Toast from 'react-native-toast-message';
 import qs from 'qs';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Context = React.createContext();
 class Provider extends Component {
@@ -20,7 +21,6 @@ class Provider extends Component {
       photo: '',
       isBuyer: false,
       idcard_no: '',
-      jobs: [],
       orders: [],
     },
     cards: [],
@@ -28,6 +28,16 @@ class Provider extends Component {
     updatePasswordSuccess: false,
     editProfileSuccess: false,
   };
+
+  async componentDidMount() {
+    const userData = await this.getUserData();
+
+    if (userData !== null) {
+      this.setState((previousState) => ({
+        user: userData,
+      }));
+    }
+  }
 
   login = ({ email, password }) => {
     let data = new FormData();
@@ -67,6 +77,7 @@ class Provider extends Component {
           }
         }
       )
+      .then(() => this.saveUserData())
       .catch(
         ({
           response: {
@@ -115,6 +126,7 @@ class Provider extends Component {
           }));
         }
       })
+      .then(() => this.saveUserData())
       .catch(
         ({
           response: {
@@ -143,10 +155,11 @@ class Provider extends Component {
         photo: '',
         isBuyer: false,
         idcard_no: '',
-        jobs: [],
         orders: [],
       },
     }));
+    this.removeUserData();
+
     Toast.show({
       type: 'info',
       position: 'bottom',
@@ -171,27 +184,18 @@ class Provider extends Component {
       .catch((error) => console.error(error.response));
   };
 
-  fetchJobs = () => {
+  fetchOrders = () => {
     let { url, user } = this.state;
 
     axios
       .get(`${url}/transaction/ongoing/${user.id}`)
       .then(({ data }) => {
-        if (user.isBuyer) {
-          this.setState((previousState) => ({
-            user: {
-              ...previousState.user,
-              orders: data.filter((d) => d.client_id == user.id),
-            },
-          }));
-        } else if (!user.isBuyer) {
-          this.setState((previousState) => ({
-            user: {
-              ...previousState.user,
-              jobs: data.filter((d) => d.freelancer_id == user.id),
-            },
-          }));
-        }
+        this.setState((previousState) => ({
+          user: {
+            ...previousState.user,
+            orders: data,
+          },
+        }));
       })
       .catch((error) => console.error(error.response));
   };
@@ -345,6 +349,7 @@ class Provider extends Component {
           editProfileSuccess: true,
         }));
       })
+      .then(() => this.saveUserData())
       .catch(({ response }) => {
         console.error(response);
         this.setState({
@@ -387,7 +392,6 @@ class Provider extends Component {
             isLoggedIn: false,
             photo: '',
             isBuyer: false,
-            jobs: [],
             orders: [],
           },
           updatePasswordSuccess: true,
@@ -411,6 +415,118 @@ class Provider extends Component {
       );
   };
 
+  confirmOrder = (id) => {
+    let data = new FormData();
+    data.append('accept', 1);
+
+    axios
+      .post(`${this.state.url}/transaction/confirm/${id}`, data)
+      .then(({ data }) => {
+        console.log(data);
+        this.setState((previousState) => ({
+          user: {
+            ...previousState.user,
+            orders: previousState.user.orders.map((order) =>
+              order.id == id ? { ...order, accept: 1 } : order
+            ),
+          },
+        }));
+
+        Toast.show({
+          type: 'success',
+          position: 'bottom',
+          text1: 'Order confirmed!',
+        });
+      })
+      .catch((error) => console.error(error.response));
+  };
+
+  submitOrder = ({ id, message }) => {
+    this.setState((previousState) => ({
+      user: {
+        ...previousState.user,
+        orders: previousState.user.orders.map((order) =>
+          order.id == id ? { ...order, message } : order
+        ),
+      },
+    }));
+
+    Toast.show({
+      type: 'success',
+      position: 'bottom',
+      text1: 'Job submitted!',
+    });
+  };
+
+  cancelOrder = (id) => {
+    let data = new FormData();
+    data.append('accept', 2);
+
+    axios
+      .post(`${this.state.url}/transaction/confirm/${id}`, data)
+      .then(({ data }) => {
+        console.log(data);
+        this.setState((previousState) => ({
+          user: {
+            ...previousState.user,
+            orders: previousState.user.orders.filter(
+              (order) => order.id !== id
+            ),
+          },
+        }));
+
+        Toast.show({
+          type: 'success',
+          position: 'bottom',
+          text1: 'Order cancelled',
+        });
+      })
+      .catch((error) => console.error(error.response));
+  };
+
+  doneOrder = (id) => {
+    //TODO: DO DONE REQUEST ON TRANSACTION HERE
+
+    this.setState((previousState) => ({
+      user: {
+        ...previousState.user,
+        orders: previousState.user.orders.filter((order) => order.id !== id),
+      },
+    }));
+
+    Toast.show({
+      type: 'success',
+      position: 'bottom',
+      text1: "It's a pleasure to work with you.",
+    });
+  };
+
+  saveUserData = async () => {
+    try {
+      await AsyncStorage.setItem('UserData', JSON.stringify(this.state.user));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  getUserData = async () => {
+    try {
+      const userData = await AsyncStorage.getItem('UserData');
+
+      return userData !== null ? JSON.parse(userData) : null;
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  removeUserData = async () => {
+    try {
+      await AsyncStorage.removeItem('UserData');
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   render() {
     return (
       <>
@@ -429,7 +545,11 @@ class Provider extends Component {
             deleteLapak: this.deleteLapak,
             updatePassword: this.updatePassword,
             editProfile: this.editProfile,
-            fetchJobs: this.fetchJobs,
+            fetchOrders: this.fetchOrders,
+            cancelOrder: this.cancelOrder,
+            doneOrder: this.doneOrder,
+            confirmOrder: this.confirmOrder,
+            submitOrder: this.submitOrder,
           }}
         >
           {this.props.children}

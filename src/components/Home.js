@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Picker } from '@react-native-picker/picker';
@@ -13,15 +13,19 @@ import {
   Modal,
   Switch,
   TextInput,
+  RefreshControl,
 } from 'react-native';
 import { Divider } from 'react-native-paper';
 import { Button } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/Ionicons';
+import Toast from 'react-native-toast-message';
 
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 
 import { Context } from '../context';
+
+import OfflineNotice from '../utils/OfflineNotice';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -95,6 +99,7 @@ const BuyerDashboard = ({ navigation }) => {
     selectCategory,
   } = useContext(Context);
 
+  const [refreshing, setRefreshing] = useState(false);
   const [visible, setVisible] = useState(false);
   const [cardData, setCardData] = useState({
     id: '',
@@ -146,11 +151,29 @@ const BuyerDashboard = ({ navigation }) => {
     navigation.navigate('BuyerJobList');
   };
 
+  const onRefresh = useCallback(() => {
+    setRefreshing((previousState) => !previousState);
+
+    fetchData();
+
+    Toast.show({
+      text1: 'Fetching...',
+      type: 'info',
+      position: 'bottom',
+    });
+
+    setRefreshing((previousState) => !previousState);
+  }, []);
+
   return (
     <View style={styles.container}>
+      <OfflineNotice />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scroll}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       >
         <View style={styles.level}>
           <Text style={[styles.label, styles.coloredText]}>Dashboard</Text>
@@ -333,7 +356,7 @@ const BuyerDashboard = ({ navigation }) => {
 
 const BuyerJobList = () => {
   const {
-    state: { user, cards, selectedCategoryId },
+    state: { cards, selectedCategoryId },
     orderLapak,
   } = useContext(Context);
 
@@ -381,6 +404,7 @@ const BuyerJobList = () => {
 
   return (
     <View style={styles.container}>
+      <OfflineNotice />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scroll}
@@ -519,6 +543,7 @@ const SellerDashboard = ({ navigation }) => {
     fetchData,
   } = useContext(Context);
 
+  const [refreshing, setRefreshing] = useState(false);
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [updateModalVisible, setUpdateModalVisible] = useState(false);
   const [showMyJobsModalVisible, setShowMyJobsModalVisible] = useState(false);
@@ -563,11 +588,29 @@ const SellerDashboard = ({ navigation }) => {
     setUpdateModalVisible((previousState) => !previousState);
   };
 
+  const onRefresh = useCallback(() => {
+    setRefreshing((previousState) => !previousState);
+
+    fetchData();
+
+    Toast.show({
+      text1: 'Fetching...',
+      type: 'info',
+      position: 'bottom',
+    });
+
+    setRefreshing((previousState) => !previousState);
+  }, []);
+
   return (
     <View style={styles.container}>
+      <OfflineNotice />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scroll}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       >
         <View style={styles.level}>
           <Text style={[styles.label, styles.coloredText]}>Dashboard</Text>
@@ -1007,37 +1050,126 @@ const Orders = () => {
 };
 
 const BuyerOrders = () => {
-  let data = [
-    {
-      id: 1,
-      title: 'Test',
-    },
-    {
-      id: 2,
-      title: 'Test2',
-    },
-    {
-      id: 3,
-      title: 'Test3',
-    },
-  ];
+  const {
+    state: { user, cards },
+    fetchOrders,
+    doneOrder,
+    cancelOrder,
+  } = useContext(Context);
 
-  const renderCards = ({ title }, index) => {
+  const [refreshing, setRefreshing] = useState(false);
+  const [doneModalVisible, setDoneModalVisible] = useState(false);
+  const [transactionDetail, setTransactionDetail] = useState({
+    id: '',
+    title: '',
+    message: '',
+  });
+
+  useEffect(() => {
+    if (user.orders.length == 0) fetchOrders();
+  }, []);
+
+  const renderOngoingOrders = ({ id, lapak_id, message }, index) => {
+    let { title } = cards.find((c) => c.id == lapak_id);
     return (
-      <Button
-        buttonStyle={[styles.btnOrder]}
-        titleStyle={styles.textRegular}
-        title={title}
+      <View
+        style={[styles.btnOrder, { width: 300, marginLeft: 10 }]}
         key={index}
-      ></Button>
+      >
+        <Text
+          style={[
+            styles.textRegular,
+            styles.largeText,
+            styles.darkText,
+            {
+              alignSelf: 'stretch',
+              flexGrow: 2,
+              justifyContent: 'center',
+              textAlign: 'center',
+              backgroundColor: '#96ffb2',
+              paddingTop: 15,
+            },
+          ]}
+        >
+          {title}
+        </Text>
+        <Button
+          title="Done"
+          buttonStyle={{ backgroundColor: '#3FA578' }}
+          titleStyle={styles.textRegular}
+          onPress={() => renderDoneModal(id, title, message)}
+        ></Button>
+      </View>
     );
   };
 
+  const renderDoneModal = (id, title, message) => {
+    setTransactionDetail((previousState) => ({
+      id,
+      title,
+      message,
+    }));
+
+    setDoneModalVisible((previousState) => !previousState);
+  };
+
+  const renderPendingOrders = ({ id, lapak_id }, index) => {
+    let { title } = cards.find((c) => c.id == lapak_id);
+    return (
+      <View
+        style={[styles.btnOrder, { width: 300, marginLeft: 10 }]}
+        key={index}
+      >
+        <Text
+          style={[
+            styles.textRegular,
+            styles.largeText,
+            styles.darkText,
+            {
+              alignSelf: 'stretch',
+              flexGrow: 2,
+              justifyContent: 'center',
+              textAlign: 'center',
+              backgroundColor: '#96ffb2',
+              paddingTop: 15,
+            },
+          ]}
+        >
+          {title}
+        </Text>
+        <Button
+          title="Cancel"
+          buttonStyle={{ backgroundColor: '#3FA578' }}
+          titleStyle={styles.textRegular}
+          onPress={() => cancelOrder(id)}
+        ></Button>
+      </View>
+    );
+  };
+
+  const onRefresh = useCallback(() => {
+    setRefreshing((previousState) => !previousState);
+
+    fetchOrders();
+
+    Toast.show({
+      text1: 'Fetching...',
+      type: 'info',
+      position: 'bottom',
+    });
+
+    setRefreshing((previousState) => !previousState);
+  }, []);
+
   return (
     <View style={styles.container}>
+      <OfflineNotice />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scroll}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       >
         <View style={styles.level}>
           <Text style={[styles.label, styles.coloredText]}>Orders</Text>
@@ -1046,8 +1178,138 @@ const BuyerOrders = () => {
             source={require('../assets/img/logo.png')}
           />
         </View>
-        <View style={(styles.container, { flexGrow: 2 })}>
-          {data.map((card, index) => renderCards(card, index))}
+        <View
+          style={[
+            {
+              flexGrow: 2,
+              alignItems: 'center',
+            },
+          ]}
+        >
+          <View style={[styles.floatLeft, styles.paddingHorizontal]}>
+            <Text
+              style={[styles.darkText, styles.textRegular, styles.mediumText]}
+            >
+              Ongoing Orders
+            </Text>
+            {user.orders.filter(
+              (order) => order.client_id == user.id && order.accept == 1
+            ).length == 0 ? (
+              <Text>No ongoing orders</Text>
+            ) : (
+              user.orders
+                .filter(
+                  (order) => order.client_id == user.id && order.accept == 1
+                )
+                .map((order, index) => renderOngoingOrders(order, index))
+            )}
+            <Modal animationType="slide" visible={doneModalVisible}>
+              <View style={[styles.container, { backgroundColor: '#eee' }]}>
+                <Icon
+                  name="md-close"
+                  size={35}
+                  color="#333"
+                  style={{
+                    alignSelf: 'flex-end',
+                    marginRight: 30,
+                    marginTop: 10,
+                  }}
+                  onPress={() =>
+                    setDoneModalVisible((previousState) => !previousState)
+                  }
+                ></Icon>
+                <Image
+                  style={styles.modalImage}
+                  source={require('../assets/img/logo.png')}
+                ></Image>
+                <View
+                  style={{
+                    flex: 2,
+                    backgroundColor: '#fff',
+                    alignSelf: 'stretch',
+                    alignItems: 'center',
+                    borderRadius: 30,
+                    marginTop: 30,
+                    paddingVertical: 10,
+                    paddingHorizontal: 30,
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.textBold,
+                      styles.header,
+                      { marginVertical: 20 },
+                    ]}
+                  >
+                    Transaction Detail
+                  </Text>
+                  <Text
+                    style={[
+                      styles.textBold,
+                      styles.mediumText,
+                      styles.floatLeft,
+                    ]}
+                  >
+                    Title: {transactionDetail.title}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.textBold,
+                      styles.mediumText,
+                      styles.floatLeft,
+                    ]}
+                  >
+                    Message: {transactionDetail.message}
+                  </Text>
+                  <Image
+                    source={require('../assets/img/logo.png')}
+                    style={{
+                      width: 200,
+                      height: 200,
+                      resizeMode: 'contain',
+                      marginVertical: 10,
+                    }}
+                  ></Image>
+                  <View
+                    style={{
+                      justifyContent: 'flex-end',
+                      flex: 1,
+                      marginBottom: 35,
+                    }}
+                  >
+                    <Button
+                      title="Done"
+                      buttonStyle={{ width: 300, backgroundColor: '#3FA578' }}
+                      titleStyle={styles.textBold}
+                      onPress={() => {
+                        doneOrder(transactionDetail.id);
+                        setDoneModalVisible((previousState) => !previousState);
+                      }}
+                    ></Button>
+                  </View>
+                </View>
+              </View>
+            </Modal>
+          </View>
+          <Text> </Text>
+          <View style={[styles.floatLeft, styles.paddingHorizontal]}>
+            <Text
+              style={[styles.darkText, styles.textRegular, styles.mediumText]}
+            >
+              Pending Orders
+            </Text>
+            {user.orders.filter(
+              (order) => order.client_id == user.id && order.accept == null
+            ).length == 0 ? (
+              <Text>No pending orders</Text>
+            ) : (
+              user.orders
+                .filter(
+                  (order) => order.client_id == user.id && order.accept == null
+                )
+                .map((order, index) => renderPendingOrders(order, index))
+            )}
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -1055,37 +1317,118 @@ const BuyerOrders = () => {
 };
 
 const SellerOrders = () => {
-  let data = [
-    {
-      id: 1,
-      title: 'Test',
-    },
-    {
-      id: 2,
-      title: 'Test2',
-    },
-    {
-      id: 3,
-      title: 'Test3',
-    },
-  ];
+  const {
+    state: { user, cards },
+    fetchOrders,
+    submitOrder,
+    confirmOrder,
+  } = useContext(Context);
 
-  const renderCards = ({ title }, index) => {
+  const [refreshing, setRefreshing] = useState(false);
+  const [doneModalVisible, setDoneModalVisible] = useState(false);
+  const [transactionId, setTransactionId] = useState(0);
+
+  useEffect(() => {
+    if (user.orders.length == 0) fetchOrders();
+  }, []);
+
+  const renderOngoingOrders = ({ id, lapak_id, message }, index) => {
+    let { title } = cards.find((c) => c.id == lapak_id);
     return (
-      <Button
-        buttonStyle={[styles.btnOrder]}
-        titleStyle={styles.textRegular}
-        title={title}
+      <View
+        style={[styles.btnOrder, { width: 300, marginLeft: 10 }]}
         key={index}
-      ></Button>
+      >
+        <Text
+          style={[
+            styles.textRegular,
+            styles.largeText,
+            styles.darkText,
+            {
+              alignSelf: 'stretch',
+              flexGrow: 2,
+              justifyContent: 'center',
+              textAlign: 'center',
+              backgroundColor: '#96ffb2',
+              paddingTop: 15,
+            },
+          ]}
+        >
+          {title}
+        </Text>
+        <Button
+          title="Submit"
+          buttonStyle={{ backgroundColor: '#3FA578' }}
+          titleStyle={styles.textRegular}
+          onPress={() => renderSubmitModal(id)}
+        ></Button>
+      </View>
     );
   };
 
+  const renderSubmitModal = (id) => {
+    setTransactionId((previousState) => id);
+
+    setDoneModalVisible((previousState) => !previousState);
+  };
+
+  const renderPendingOrders = ({ id, lapak_id }, index) => {
+    let { title } = cards.find((c) => c.id == lapak_id);
+    return (
+      <View
+        style={[styles.btnOrder, { width: 300, marginLeft: 10 }]}
+        key={index}
+      >
+        <Text
+          style={[
+            styles.textRegular,
+            styles.largeText,
+            styles.darkText,
+            {
+              alignSelf: 'stretch',
+              flexGrow: 2,
+              justifyContent: 'center',
+              textAlign: 'center',
+              backgroundColor: '#96ffb2',
+              paddingTop: 15,
+            },
+          ]}
+        >
+          {title}
+        </Text>
+        <Button
+          title="Accept"
+          buttonStyle={{ backgroundColor: '#3FA578' }}
+          titleStyle={styles.textRegular}
+          onPress={() => confirmOrder(id)}
+        ></Button>
+      </View>
+    );
+  };
+
+  const onRefresh = useCallback(() => {
+    setRefreshing((previousState) => !previousState);
+
+    fetchOrders();
+
+    Toast.show({
+      text1: 'Fetching...',
+      type: 'info',
+      position: 'bottom',
+    });
+
+    setRefreshing((previousState) => !previousState);
+  }, []);
+
   return (
     <View style={styles.container}>
+      <OfflineNotice />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scroll}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       >
         <View style={styles.level}>
           <Text style={[styles.label, styles.coloredText]}>Orders</Text>
@@ -1094,8 +1437,157 @@ const SellerOrders = () => {
             source={require('../assets/img/logo.png')}
           />
         </View>
-        <View style={(styles.container, { flexGrow: 2 })}>
-          {data.map((card, index) => renderCards(card, index))}
+        <View
+          style={[
+            {
+              flexGrow: 2,
+              alignItems: 'center',
+            },
+          ]}
+        >
+          <View style={[styles.floatLeft, styles.paddingHorizontal]}>
+            <Text
+              style={[styles.darkText, styles.textRegular, styles.mediumText]}
+            >
+              Ongoing Orders
+            </Text>
+            {user.orders.filter(
+              (order) => order.freelancer_id == user.id && order.accept == 1
+            ).length == 0 ? (
+              <Text>No ongoing orders</Text>
+            ) : (
+              user.orders
+                .filter(
+                  (order) =>
+                    order.freelancer_id == user.id &&
+                    order.accept == 1 &&
+                    order.status == null
+                )
+                .map((order, index) => renderOngoingOrders(order, index))
+            )}
+            <Modal animationType="slide" visible={doneModalVisible}>
+              <View style={[styles.container, { backgroundColor: '#eee' }]}>
+                <Icon
+                  name="md-close"
+                  size={35}
+                  color="#333"
+                  style={{
+                    alignSelf: 'flex-end',
+                    marginRight: 30,
+                    marginTop: 10,
+                  }}
+                  onPress={() =>
+                    setDoneModalVisible((previousState) => !previousState)
+                  }
+                ></Icon>
+                <Image
+                  style={styles.modalImage}
+                  source={require('../assets/img/logo.png')}
+                ></Image>
+                <View
+                  style={{
+                    flex: 2,
+                    backgroundColor: '#fff',
+                    alignSelf: 'stretch',
+                    alignItems: 'center',
+                    borderRadius: 30,
+                    marginTop: 30,
+                    paddingVertical: 10,
+                    paddingHorizontal: 30,
+                  }}
+                >
+                  <ScrollView
+                    style={styles.formContainer}
+                    showsVerticalScrollIndicator={false}
+                  >
+                    <Formik
+                      initialValues={{
+                        id: transactionId,
+                        message: '',
+                      }}
+                      onSubmit={(values, { resetForm }) => {
+                        submitOrder(values);
+                        resetForm();
+                        setDoneModalVisible((previousState) => !previousState);
+                      }}
+                      validationSchema={Yup.object().shape({
+                        message: Yup.string().required(
+                          'Message cannot be empty'
+                        ),
+                      })}
+                    >
+                      {({
+                        handleChange,
+                        handleSubmit,
+                        values,
+                        errors,
+                        setFieldTouched,
+                        isValid,
+                        touched,
+                      }) => (
+                        <>
+                          <View style={styles.inputContainer}>
+                            <Text style={styles.label}>Message</Text>
+                            <TextInput
+                              value={values.message}
+                              onChangeText={handleChange('message')}
+                              onBlur={() => setFieldTouched('message')}
+                              style={styles.input}
+                              autoFocus={true}
+                            />
+                            {touched.message && errors.message && (
+                              <Text style={{ fontSize: 10, color: 'red' }}>
+                                {errors.message}
+                              </Text>
+                            )}
+                          </View>
+                          <View style={styles.inputContainer}>
+                            <Text style={styles.label}>Result</Text>
+                            <Image
+                              source={require('../assets/img/logo.png')}
+                              style={{
+                                width: 200,
+                                height: 200,
+                                resizeMode: 'contain',
+                                marginVertical: 10,
+                              }}
+                            ></Image>
+                          </View>
+                          <Button
+                            onPress={handleSubmit}
+                            title="Submit"
+                            disabled={!isValid}
+                            buttonStyle={[styles.button, styles.createButton]}
+                            titleStyle={styles.createButtonText}
+                          ></Button>
+                        </>
+                      )}
+                    </Formik>
+                  </ScrollView>
+                </View>
+              </View>
+            </Modal>
+          </View>
+          <Text> </Text>
+          <View style={[styles.floatLeft, styles.paddingHorizontal]}>
+            <Text
+              style={[styles.darkText, styles.textRegular, styles.mediumText]}
+            >
+              Pending Orders
+            </Text>
+            {user.orders.filter(
+              (order) => order.freelancer_id == user.id && order.accept == null
+            ).length == 0 ? (
+              <Text>No pending orders</Text>
+            ) : (
+              user.orders
+                .filter(
+                  (order) =>
+                    order.freelancer_id == user.id && order.accept == null
+                )
+                .map((order, index) => renderPendingOrders(order, index))
+            )}
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -1123,6 +1615,7 @@ const Settings = () => {
 
   return (
     <View style={styles.container}>
+      <OfflineNotice />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scroll}
