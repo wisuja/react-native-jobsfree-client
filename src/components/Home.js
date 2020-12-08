@@ -512,11 +512,56 @@ const Seller = () => {
 
 const SellerDashboard = ({ navigation }) => {
   const {
-    state: { user },
+    state: { user, cards },
     createLapak,
+    updateLapak,
+    deleteLapak,
+    fetchData,
   } = useContext(Context);
 
-  const [visible, setVisible] = useState(false);
+  const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [updateModalVisible, setUpdateModalVisible] = useState(false);
+  const [showMyJobsModalVisible, setShowMyJobsModalVisible] = useState(false);
+
+  const [lapakData, setLapakData] = useState({
+    id: '',
+    category_id: '',
+    title: '',
+    description: '',
+    price_tag: '',
+  });
+
+  useEffect(() => {
+    if (cards.length == 0) fetchData();
+  }, [cards]);
+
+  const renderCards = ({ id, title }, index) => {
+    return (
+      <Button
+        buttonStyle={[styles.btnOrder, { width: 300 }]}
+        titleStyle={styles.textRegular}
+        title={title}
+        key={index}
+        onPress={() => renderUpdateModal(id)}
+      ></Button>
+    );
+  };
+
+  const renderUpdateModal = (cardId) => {
+    let { id, category_id, title, description, price_tag } = cards.find(
+      (c) => c.id == cardId
+    );
+
+    setLapakData((previousState) => ({
+      id,
+      category_id,
+      title,
+      description,
+      price_tag,
+    }));
+
+    setUpdateModalVisible((previousState) => !previousState);
+  };
 
   return (
     <View style={styles.container}>
@@ -565,9 +610,9 @@ const SellerDashboard = ({ navigation }) => {
           <Button
             title="Create a project"
             buttonStyle={styles.btnSeller}
-            onPress={() => setVisible(true)}
+            onPress={() => setCreateModalVisible(true)}
           ></Button>
-          <Modal animationType="slide" visible={visible}>
+          <Modal animationType="slide" visible={createModalVisible}>
             <View style={[styles.container, { backgroundColor: '#eee' }]}>
               <Icon
                 name="md-close"
@@ -578,7 +623,7 @@ const SellerDashboard = ({ navigation }) => {
                   marginRight: 30,
                   marginTop: 10,
                 }}
-                onPress={() => setVisible(false)}
+                onPress={() => setCreateModalVisible(false)}
               ></Icon>
               <Image
                 style={styles.modalImage}
@@ -619,7 +664,7 @@ const SellerDashboard = ({ navigation }) => {
                     onSubmit={(values, { resetForm }) => {
                       createLapak(values);
                       resetForm();
-                      setVisible((previousState) => !previousState);
+                      set((previousState) => !previousState);
                     }}
                     validationSchema={Yup.object().shape({
                       category_id: Yup.number().required(
@@ -727,6 +772,222 @@ const SellerDashboard = ({ navigation }) => {
             buttonStyle={styles.btnSeller}
             onPress={() => navigation.navigate('Orders')}
           ></Button>
+          <Button
+            title="My projects"
+            buttonStyle={styles.btnSeller}
+            onPress={() =>
+              setShowMyJobsModalVisible((previousState) => !previousState)
+            }
+          ></Button>
+          <Modal animationType="slide" visible={showMyJobsModalVisible}>
+            <View style={[styles.container, { backgroundColor: '#eee' }]}>
+              <Icon
+                name="md-close"
+                size={35}
+                color="#333"
+                style={{
+                  alignSelf: 'flex-end',
+                  marginRight: 30,
+                  marginVertical: 10,
+                }}
+                onPress={() =>
+                  setShowMyJobsModalVisible((previousState) => !previousState)
+                }
+              ></Icon>
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.scroll}
+              >
+                <View style={styles.level}>
+                  <Text style={[styles.label, styles.coloredText]}>
+                    My Jobs
+                  </Text>
+                  <Image
+                    style={styles.icon}
+                    source={require('../assets/img/logo.png')}
+                  />
+                </View>
+                <View
+                  style={{ flex: 2, alignItems: 'center', marginLeft: -10 }}
+                >
+                  {cards.filter((c) => c.user_id == user.id).length == 0 ? (
+                    <Text>No Jobs Found</Text>
+                  ) : (
+                    cards
+                      .filter((c) => c.user_id == user.id)
+                      .map((card, index) => renderCards(card, index))
+                  )}
+                </View>
+              </ScrollView>
+            </View>
+          </Modal>
+          <Modal animationType="slide" visible={updateModalVisible}>
+            <View style={[styles.container, { backgroundColor: '#eee' }]}>
+              <Icon
+                name="md-close"
+                size={35}
+                color="#333"
+                style={{
+                  alignSelf: 'flex-end',
+                  marginRight: 30,
+                  marginTop: 10,
+                }}
+                onPress={() => setUpdateModalVisible(false)}
+              ></Icon>
+              <Image
+                style={styles.modalImage}
+                source={require('../assets/img/logo.png')}
+              ></Image>
+              <View
+                style={{
+                  flex: 2,
+                  backgroundColor: '#fff',
+                  alignSelf: 'stretch',
+                  alignItems: 'center',
+                  borderRadius: 30,
+                  marginTop: 30,
+                  paddingVertical: 10,
+                  paddingHorizontal: 30,
+                }}
+              >
+                <Text
+                  style={[
+                    styles.textBold,
+                    styles.header,
+                    { marginVertical: 20 },
+                  ]}
+                >
+                  Update Form
+                </Text>
+                <Icon
+                  name="md-trash"
+                  size={35}
+                  color="#333"
+                  style={{
+                    alignSelf: 'flex-end',
+                    marginRight: 30,
+                    marginTop: 10,
+                  }}
+                  onPress={() => deleteLapak(lapakData.id)}
+                ></Icon>
+                <ScrollView
+                  style={styles.formContainer}
+                  showsVerticalScrollIndicator={false}
+                >
+                  <Formik
+                    initialValues={{
+                      id: lapakData.id,
+                      category_id: lapakData.category_id,
+                      title: lapakData.title,
+                      description: lapakData.description,
+                      price_tag: lapakData.price_tag,
+                    }}
+                    onSubmit={(values, { resetForm }) => {
+                      updateLapak(values);
+                      resetForm();
+                      setUpdateModalVisible((previousState) => !previousState);
+                    }}
+                    validationSchema={Yup.object().shape({
+                      category_id: Yup.number().required(
+                        'Please pick a category'
+                      ),
+                      title: Yup.string().required('Title cannot be empty'),
+                      description: Yup.string().required(
+                        'Description cannot be empty'
+                      ),
+                      price_tag: Yup.number().required('Price cannot be empty'),
+                    })}
+                  >
+                    {({
+                      handleChange,
+                      handleSubmit,
+                      values,
+                      errors,
+                      setFieldTouched,
+                      isValid,
+                      touched,
+                      setFieldValue,
+                    }) => (
+                      <>
+                        <View style={styles.inputContainer}>
+                          <Text style={styles.label}>Title</Text>
+                          <TextInput
+                            value={values.title}
+                            onChangeText={handleChange('title')}
+                            onBlur={() => setFieldTouched('title')}
+                            style={styles.input}
+                            autoFocus={true}
+                          />
+                          {touched.title && errors.title && (
+                            <Text style={{ fontSize: 10, color: 'red' }}>
+                              {errors.title}
+                            </Text>
+                          )}
+                        </View>
+                        <View style={styles.inputContainer}>
+                          <Text style={styles.label}>Description</Text>
+                          <TextInput
+                            value={values.description}
+                            onChangeText={handleChange('description')}
+                            onBlur={() => setFieldTouched('description')}
+                            style={styles.input}
+                          />
+                          {touched.description && errors.description && (
+                            <Text style={{ fontSize: 10, color: 'red' }}>
+                              {errors.description}
+                            </Text>
+                          )}
+                        </View>
+                        <View style={styles.inputContainer}>
+                          <Text style={styles.label}>Category</Text>
+                          <Picker
+                            selectedValue={values.category_id}
+                            onValueChange={(value) =>
+                              setFieldValue('category_id', value)
+                            }
+                            style={styles.input}
+                          >
+                            <Picker.Item label="Logo" value={1} />
+                            <Picker.Item label="Illustration" value={2} />
+                            <Picker.Item label="Character Design" value={3} />
+                            <Picker.Item label="Game Design" value={4} />
+                            <Picker.Item label="3D Modeling" value={5} />
+                            <Picker.Item label="UI/UX" value={6} />
+                          </Picker>
+                          {touched.category_id && errors.category_id && (
+                            <Text style={{ fontSize: 10, color: 'red' }}>
+                              {errors.category_id}
+                            </Text>
+                          )}
+                        </View>
+                        <View style={styles.inputContainer}>
+                          <Text style={styles.label}>Price</Text>
+                          <TextInput
+                            value={values.price_tag}
+                            onChangeText={handleChange('price_tag')}
+                            onBlur={() => setFieldTouched('price_tag')}
+                            style={styles.input}
+                          />
+                          {touched.price_tag && errors.price_tag && (
+                            <Text style={{ fontSize: 10, color: 'red' }}>
+                              {errors.price_tag}
+                            </Text>
+                          )}
+                        </View>
+                        <Button
+                          onPress={handleSubmit}
+                          title="Update"
+                          disabled={!isValid}
+                          buttonStyle={[styles.button, styles.createButton]}
+                          titleStyle={styles.createButtonText}
+                        ></Button>
+                      </>
+                    )}
+                  </Formik>
+                </ScrollView>
+              </View>
+            </View>
+          </Modal>
         </View>
       </ScrollView>
     </View>

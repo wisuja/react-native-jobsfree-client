@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import moment from 'moment';
 import Toast from 'react-native-toast-message';
+import qs from 'qs';
 
 const Context = React.createContext();
 class Provider extends Component {
@@ -19,6 +20,8 @@ class Provider extends Component {
       photo: '',
       isBuyer: false,
       idcard_no: '',
+      jobs: [],
+      orders: [],
     },
     cards: [],
     reminder: false,
@@ -41,6 +44,7 @@ class Provider extends Component {
           if (status == 200) {
             this.setState((previousState) => ({
               user: {
+                ...previousState.user,
                 id: id,
                 name: name,
                 email: email,
@@ -95,6 +99,7 @@ class Provider extends Component {
         if (status == 200) {
           this.setState((previousState) => ({
             user: {
+              ...previousState.user,
               id: id,
               name: name,
               email: email,
@@ -138,6 +143,8 @@ class Provider extends Component {
         photo: '',
         isBuyer: false,
         idcard_no: '',
+        jobs: [],
+        orders: [],
       },
     }));
     Toast.show({
@@ -160,6 +167,31 @@ class Provider extends Component {
         this.setState((previousState) => ({
           cards: data,
         }));
+      })
+      .catch((error) => console.error(error.response));
+  };
+
+  fetchJobs = () => {
+    let { url, user } = this.state;
+
+    axios
+      .get(`${url}/transaction/ongoing/${user.id}`)
+      .then(({ data }) => {
+        if (user.isBuyer) {
+          this.setState((previousState) => ({
+            user: {
+              ...previousState.user,
+              orders: data.filter((d) => d.client_id == user.id),
+            },
+          }));
+        } else if (!user.isBuyer) {
+          this.setState((previousState) => ({
+            user: {
+              ...previousState.user,
+              jobs: data.filter((d) => d.freelancer_id == user.id),
+            },
+          }));
+        }
       })
       .catch((error) => console.error(error.response));
   };
@@ -198,13 +230,72 @@ class Provider extends Component {
 
     axios
       .post(`${this.state.url}/lapak`, data)
-      .then((response) => {
+      .then(({ data }) => {
+        console.log(data);
         Toast.show({
           type: 'success',
           position: 'bottom',
           text1: 'Job successfully created!',
         });
-        console.log(response.data);
+        this.setState((previousState) => ({
+          cards: [...previousState.cards, data],
+        }));
+      })
+      .catch((error) => console.error(error.response));
+  };
+
+  updateLapak = ({ id, category_id, title, description, price_tag }) => {
+    let data = {
+      user_id: this.state.user.id,
+      category_id,
+      title,
+      description,
+      requirement: 'None',
+      price_tag,
+      working_hours: '8-5',
+      status: 'active',
+    };
+    axios
+      .put(`${this.state.url}/lapak/${id}`, qs.stringify(data), {
+        headers: {
+          'Content-Type': 'x-www-form-urlencoded',
+        },
+      })
+      .then(({ data }) => {
+        console.log(data);
+
+        Toast.show({
+          type: 'success',
+          position: 'bottom',
+          text1: 'Job successfully updated!',
+        });
+
+        this.setState((previousState) => ({
+          cards: previousState.cards.map((card) =>
+            card.id == id
+              ? { ...card, title, description, price_tag, category_id }
+              : card
+          ),
+        }));
+      })
+      .catch((error) => console.error(error.response));
+  };
+
+  deleteLapak = (lapak_id) => {
+    axios
+      .delete(`${this.state.url}/lapak/${lapak_id}`)
+      .then(({ data }) => {
+        console.log(data);
+
+        Toast.show({
+          type: 'success',
+          position: 'bottom',
+          text1: 'Job successfully deleted!',
+        });
+
+        this.setState((previousState) => ({
+          cards: previousState.cards.filter((card) => card.id !== lapak_id),
+        }));
       })
       .catch((error) => console.error(error.response));
   };
@@ -216,23 +307,28 @@ class Provider extends Component {
   };
 
   editProfile = ({ isBuyer, name, email, phone, idNumber }) => {
-    let data = new FormData();
-
-    data.append('role_id', isBuyer ? 1 : 2);
-    data.append('name', name);
-    data.append('email', email);
-    data.append('phone_no', phone);
-    data.append('idcard_no', idNumber);
+    let data = {
+      role_id: isBuyer ? 1 : 2,
+      name: name,
+      email: email,
+      phone_no: phone,
+      idcard_no: idNumber,
+    };
 
     axios
-      .put(`${this.state.url}/user/${this.state.user.id}`, data)
+      .put(`${this.state.url}/user/${this.state.user.id}`, qs.stringify(data), {
+        headers: {
+          'Content-Type': 'x-www-form-urlencoded',
+        },
+      })
       .then((response) => {
+        console.log(response.data);
+
         Toast.show({
           type: 'success',
           position: 'bottom',
           text1: 'Profile successfully updated!',
         });
-        console.log(response.data);
 
         this.setState((previousState) => ({
           error: {
@@ -249,22 +345,15 @@ class Provider extends Component {
           editProfileSuccess: true,
         }));
       })
-      .catch(
-        ({
-          response: {
-            data: {
-              messages: { error },
-            },
+      .catch(({ response }) => {
+        console.error(response);
+        this.setState({
+          error: {
+            message: 'Something went wrong.',
           },
-        }) => {
-          this.setState({
-            error: {
-              message: error,
-            },
-            editProfileSuccess: false,
-          });
-        }
-      );
+          editProfileSuccess: false,
+        });
+      });
   };
 
   updatePassword = ({ oldPassword, newPassword }) => {
@@ -298,6 +387,8 @@ class Provider extends Component {
             isLoggedIn: false,
             photo: '',
             isBuyer: false,
+            jobs: [],
+            orders: [],
           },
           updatePasswordSuccess: true,
         }));
@@ -334,8 +425,11 @@ class Provider extends Component {
             orderLapak: this.orderLapak,
             selectCategory: this.selectCategory,
             createLapak: this.createLapak,
+            updateLapak: this.updateLapak,
+            deleteLapak: this.deleteLapak,
             updatePassword: this.updatePassword,
             editProfile: this.editProfile,
+            fetchJobs: this.fetchJobs,
           }}
         >
           {this.props.children}
