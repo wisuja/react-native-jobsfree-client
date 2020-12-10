@@ -114,7 +114,6 @@ export default function Register({ navigation }) {
                   onChangeText={handleChange('idNumber')}
                   onBlur={() => setFieldTouched('idNumber')}
                   style={styles.input}
-                  autoFocus={true}
                 />
                 {touched.idNumber && errors.idNumber && (
                   <Text style={{ fontSize: 10, color: 'red' }}>

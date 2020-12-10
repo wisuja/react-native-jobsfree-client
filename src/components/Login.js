@@ -68,7 +68,6 @@ export default function Login({ navigation }) {
                 <Text style={styles.label}>Email</Text>
                 <TextInput
                   value={values.email}
-                  autoFocus={true}
                   onChangeText={handleChange('email')}
                   onBlur={() => setFieldTouched('email')}
                   style={styles.input}

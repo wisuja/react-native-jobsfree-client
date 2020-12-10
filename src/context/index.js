@@ -4,6 +4,7 @@ import moment from 'moment';
 import Toast from 'react-native-toast-message';
 import qs from 'qs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import PushNotification from 'react-native-push-notification';
 
 const Context = React.createContext();
 class Provider extends Component {
@@ -35,6 +36,13 @@ class Provider extends Component {
     if (userData !== null) {
       this.setState((previousState) => ({
         user: userData,
+      }));
+    }
+
+    const reminder = await this.getReminder();
+    if (reminder !== null) {
+      this.setState((previousState) => ({
+        reminder: reminder,
       }));
     }
   }
@@ -163,7 +171,7 @@ class Provider extends Component {
     Toast.show({
       type: 'info',
       position: 'bottom',
-      text1: "You've been logged out.",
+      text1: 'Thank you for using our application.',
     });
   };
 
@@ -171,6 +179,14 @@ class Provider extends Component {
     this.setState((previousState) => ({
       reminder: value,
     }));
+
+    this.saveReminder();
+
+    if (!this.state.reminder) {
+      this.pushNotification();
+    } else {
+      this.cancelNotification();
+    }
   };
 
   fetchData = () => {
@@ -197,7 +213,9 @@ class Provider extends Component {
           },
         }));
       })
-      .catch((error) => console.error(error.response));
+      .catch((error) => {
+        console.log(error.response);
+      });
   };
 
   orderLapak = (lapakId, freelancerId) => {
@@ -442,20 +460,30 @@ class Provider extends Component {
   };
 
   submitOrder = ({ id, message }) => {
-    this.setState((previousState) => ({
-      user: {
-        ...previousState.user,
-        orders: previousState.user.orders.map((order) =>
-          order.id == id ? { ...order, message } : order
-        ),
-      },
-    }));
+    let data = new FormData();
+    data.append('message', message);
 
-    Toast.show({
-      type: 'success',
-      position: 'bottom',
-      text1: 'Job submitted!',
-    });
+    axios
+      .post(`${this.state.url}/transaction/submit/${id}`, data)
+      .then(({ data }) => {
+        console.log(data);
+
+        this.setState((previousState) => ({
+          user: {
+            ...previousState.user,
+            orders: previousState.user.orders.map((order) =>
+              order.id == id ? { ...order, message } : order
+            ),
+          },
+        }));
+
+        Toast.show({
+          type: 'success',
+          position: 'bottom',
+          text1: 'Job submitted!',
+        });
+      })
+      .catch((error) => console.log(error.response));
   };
 
   cancelOrder = (id) => {
@@ -485,20 +513,30 @@ class Provider extends Component {
   };
 
   doneOrder = (id) => {
-    //TODO: DO DONE REQUEST ON TRANSACTION HERE
+    let data = new FormData();
+    data.append('status', 'ok');
 
-    this.setState((previousState) => ({
-      user: {
-        ...previousState.user,
-        orders: previousState.user.orders.filter((order) => order.id !== id),
-      },
-    }));
+    axios
+      .post(`${this.state.url}/transaction/done/${id}`, data)
+      .then(({ data }) => {
+        console.log(data);
 
-    Toast.show({
-      type: 'success',
-      position: 'bottom',
-      text1: "It's a pleasure to work with you.",
-    });
+        this.setState((previousState) => ({
+          user: {
+            ...previousState.user,
+            orders: previousState.user.orders.filter(
+              (order) => order.id !== id
+            ),
+          },
+        }));
+
+        Toast.show({
+          type: 'success',
+          position: 'bottom',
+          text1: "It's a pleasure to work with you.",
+        });
+      })
+      .then((error) => console.log(error));
   };
 
   saveUserData = async () => {
@@ -525,6 +563,40 @@ class Provider extends Component {
     } catch (error) {
       console.error(error);
     }
+  };
+
+  saveReminder = async () => {
+    try {
+      await AsyncStorage.setItem(
+        'Reminder',
+        JSON.stringify(this.state.reminder)
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  getReminder = async () => {
+    try {
+      const reminder = await AsyncStorage.getItem('Reminder');
+
+      return reminder !== null ? JSON.parse(reminder) : null;
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  pushNotification = () => {
+    PushNotification.localNotification({
+      channelId: 'jobsfree_notifications', // (required) channelId, if the channel doesn't exist, it will be created with options passed above (importance, vibration, sound). Once the channel is created, the channel will not be update. Make sure your channelId is different if you change these options. If you have created a custom channel, it will apply options of the channel.
+      title: 'Jobsfree', // (optional)
+      message: "Let's do some real work today!", // (required)
+      repeatType: 'day', // (optional) Repeating interval. Check 'Repeating Notifications' section for more info.
+    });
+  };
+
+  cancelNotification = () => {
+    PushNotification.cancelAllLocalNotifications();
   };
 
   render() {

@@ -1,7 +1,7 @@
-import React, { useContext, useState, useEffect, useCallback } from "react";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { createStackNavigator } from "@react-navigation/stack";
-import { Picker } from "@react-native-picker/picker";
+import React, { useContext, useState, useEffect, useCallback } from 'react';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
+import { Picker } from '@react-native-picker/picker';
 import {
   View,
   Text,
@@ -14,18 +14,18 @@ import {
   Switch,
   TextInput,
   RefreshControl,
-} from "react-native";
-import { Divider } from "react-native-paper";
-import { Button } from "react-native-elements";
-import Icon from "react-native-vector-icons/Ionicons";
-import Toast from "react-native-toast-message";
+} from 'react-native';
+import { Divider } from 'react-native-paper';
+import { Button } from 'react-native-elements';
+import Icon from 'react-native-vector-icons/Ionicons';
+import Toast from 'react-native-toast-message';
 
-import { Formik } from "formik";
-import * as Yup from "yup";
+import { Formik } from 'formik';
+import * as Yup from 'yup';
 
-import { Context } from "../context";
+import { Context } from '../context';
 
-import OfflineNotice from "../utils/OfflineNotice";
+import OfflineNotice from '../utils/OfflineNotice';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -36,7 +36,7 @@ export default function Home({ navigation }) {
   } = useContext(Context);
 
   useEffect(() => {
-    if (!user.isLoggedIn) navigation.navigate("Login");
+    if (!user.isLoggedIn) navigation.navigate('Login');
   }, [user.isLoggedIn]);
 
   return (
@@ -45,19 +45,19 @@ export default function Home({ navigation }) {
         tabBarIcon: ({ color, size }) => {
           let iconName;
 
-          if (route.name === "Dashboard") {
-            iconName = "md-home";
-          } else if (route.name === "Orders") {
-            iconName = "md-list";
-          } else if (route.name === "Settings") {
-            iconName = "md-settings";
+          if (route.name === 'Dashboard') {
+            iconName = 'md-home';
+          } else if (route.name === 'Orders') {
+            iconName = 'md-list';
+          } else if (route.name === 'Settings') {
+            iconName = 'md-settings';
           }
           return <Icon name={iconName} size={size} color={color} />;
         },
       })}
       tabBarOptions={{
-        activeTintColor: "#3FA578",
-        inactiveTintColor: "gray",
+        activeTintColor: '#3FA578',
+        inactiveTintColor: 'gray',
       }}
     >
       <Tab.Screen component={Dashboard} name="Dashboard"></Tab.Screen>
@@ -102,12 +102,14 @@ const BuyerDashboard = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [visible, setVisible] = useState(false);
   const [cardData, setCardData] = useState({
-    id: "",
-    user_id: "",
-    title: "",
-    description: "",
-    category_id: "",
-    price_tag: "",
+    id: '',
+    user_id: '',
+    freelancer_name: '',
+    title: '',
+    description: '',
+    category_id: '',
+    category_name: '',
+    price_tag: '',
   });
 
   useEffect(() => {
@@ -134,9 +136,11 @@ const BuyerDashboard = ({ navigation }) => {
     setCardData((previousState) => ({
       id: card.id,
       user_id: card.user_id,
+      freelancer_name: card.freelancer_name,
       title: card.title,
       description: card.description,
       category_id: card.category_id,
+      category_name: card.category_name,
       price_tag: card.price_tag,
     }));
   };
@@ -148,7 +152,7 @@ const BuyerDashboard = ({ navigation }) => {
 
   const onPressCategory = (id) => {
     selectCategory(id);
-    navigation.navigate("BuyerJobList");
+    navigation.navigate('BuyerJobList');
   };
 
   const onRefresh = useCallback(() => {
@@ -157,9 +161,9 @@ const BuyerDashboard = ({ navigation }) => {
     fetchData();
 
     Toast.show({
-      text1: "Fetching...",
-      type: "info",
-      position: "bottom",
+      text1: 'Fetching...',
+      type: 'info',
+      position: 'bottom',
     });
 
     setRefreshing((previousState) => !previousState);
@@ -179,7 +183,7 @@ const BuyerDashboard = ({ navigation }) => {
           <Text style={[styles.label, styles.coloredText]}>Dashboard</Text>
           <Image
             style={styles.icon}
-            source={require("../assets/img/logo.png")}
+            source={require('../assets/img/logo.png')}
           />
         </View>
         <View
@@ -191,12 +195,12 @@ const BuyerDashboard = ({ navigation }) => {
           ]}
         >
           <Text style={[styles.textRegular, { fontSize: 18 }]}>
-            Hello{" "}
+            Hello{' '}
             <Text
               style={[
                 styles.coloredText,
                 styles.textBold,
-                { textTransform: "capitalize" },
+                { textTransform: 'capitalize' },
               ]}
             >
               {user.name}
@@ -206,31 +210,31 @@ const BuyerDashboard = ({ navigation }) => {
         </View>
 
         <View
-          style={[{ width: 330, alignSelf: "center" }, styles.marginalView]}
+          style={[{ width: 330, alignSelf: 'center' }, styles.marginalView]}
         >
           <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
             {cards.map((card, index) => renderCards(card, index))}
           </ScrollView>
         </View>
         <Modal animationType="slide" visible={visible}>
-          <View style={[styles.container, { backgroundColor: "#eee" }]}>
+          <View style={[styles.container, { backgroundColor: '#eee' }]}>
             <Icon
               name="md-close"
               size={35}
               color="#333"
-              style={{ alignSelf: "flex-end", marginRight: 30, marginTop: 10 }}
+              style={{ alignSelf: 'flex-end', marginRight: 30, marginTop: 10 }}
               onPress={() => setVisible(false)}
             ></Icon>
             <Image
               style={styles.modalImage}
-              source={require("../assets/img/logo.png")}
+              source={require('../assets/img/logo.png')}
             ></Image>
             <View
               style={{
                 flex: 2,
-                backgroundColor: "#fff",
-                alignSelf: "stretch",
-                alignItems: "center",
+                backgroundColor: '#fff',
+                alignSelf: 'stretch',
+                alignItems: 'center',
                 borderRadius: 30,
                 marginTop: 30,
                 paddingVertical: 10,
@@ -244,12 +248,12 @@ const BuyerDashboard = ({ navigation }) => {
                   styles.mediumText,
                 ]}
               >
-                {cardData.category_id}
+                {cardData.category_name}
               </Text>
               <Text
                 style={[styles.textRegular, styles.floatLeft, styles.header]}
               >
-                Title:{" "}
+                Title:{' '}
                 <Text style={[styles.textBold, styles.floatLeft]}>
                   {cardData.title}
                 </Text>
@@ -257,9 +261,9 @@ const BuyerDashboard = ({ navigation }) => {
               <Text
                 style={[styles.textRegular, styles.floatLeft, styles.header]}
               >
-                Freelancer:{" "}
+                Freelancer:{' '}
                 <Text style={[styles.textBold, styles.floatLeft]}>
-                  {cardData.user_id}
+                  {cardData.freelancer_name}
                 </Text>
               </Text>
               <Text
@@ -289,7 +293,7 @@ const BuyerDashboard = ({ navigation }) => {
               <View
                 style={{
                   flex: 1,
-                  justifyContent: "flex-end",
+                  justifyContent: 'flex-end',
                   marginBottom: 35,
                 }}
               >
@@ -305,25 +309,25 @@ const BuyerDashboard = ({ navigation }) => {
         </Modal>
         <View style={[styles.paddingHorizontal, styles.w75, styles.floatLeft]}>
           <Text style={[styles.textRegular, { fontSize: 18 }]}>
-            Categories that you can find in{" "}
+            Categories that you can find in{' '}
             <Text style={[styles.coloredText, styles.textBold]}>Jobsfree</Text>
           </Text>
         </View>
         <View style={[styles.level, styles.marginalView]}>
           <Button
-            buttonStyle={[styles.btnCategory, { backgroundColor: "red" }]}
+            buttonStyle={[styles.btnCategory, { backgroundColor: 'red' }]}
             titleStyle={styles.textRegular}
             title="Logo"
             onPress={() => onPressCategory(1)}
           ></Button>
           <Button
-            buttonStyle={[styles.btnCategory, { backgroundColor: "salmon" }]}
+            buttonStyle={[styles.btnCategory, { backgroundColor: 'salmon' }]}
             titleStyle={styles.textRegular}
             title="Illustration"
             onPress={() => onPressCategory(2)}
           ></Button>
           <Button
-            buttonStyle={[styles.btnCategory, { backgroundColor: "green" }]}
+            buttonStyle={[styles.btnCategory, { backgroundColor: 'green' }]}
             titleStyle={styles.textRegular}
             title="Character Design"
             onPress={() => onPressCategory(3)}
@@ -331,19 +335,19 @@ const BuyerDashboard = ({ navigation }) => {
         </View>
         <View style={[styles.level, styles.marginalView]}>
           <Button
-            buttonStyle={[styles.btnCategory, { backgroundColor: "blue" }]}
+            buttonStyle={[styles.btnCategory, { backgroundColor: 'blue' }]}
             titleStyle={styles.textRegular}
             title="Game Design"
             onPress={() => onPressCategory(4)}
           ></Button>
           <Button
-            buttonStyle={[styles.btnCategory, { backgroundColor: "tomato" }]}
+            buttonStyle={[styles.btnCategory, { backgroundColor: 'tomato' }]}
             titleStyle={styles.textRegular}
             title="3D Modeling"
             onPress={() => onPressCategory(5)}
           ></Button>
           <Button
-            buttonStyle={[styles.btnCategory, { backgroundColor: "purple" }]}
+            buttonStyle={[styles.btnCategory, { backgroundColor: 'purple' }]}
             titleStyle={styles.textRegular}
             title="UI/UX"
             onPress={() => onPressCategory(6)}
@@ -362,12 +366,14 @@ const BuyerJobList = () => {
 
   const [visible, setVisible] = useState(false);
   const [cardData, setCardData] = useState({
-    id: "",
-    user_id: "",
-    title: "",
-    description: "",
-    category_id: "",
-    price_tag: "",
+    id: '',
+    user_id: '',
+    freelancer_name: '',
+    title: '',
+    description: '',
+    category_id: '',
+    category_name: '',
+    price_tag: '',
   });
 
   const renderCards = ({ id, title }, index) => {
@@ -390,9 +396,11 @@ const BuyerJobList = () => {
     setCardData((previousState) => ({
       id: card.id,
       user_id: card.user_id,
+      freelancer_name: card.freelancer_name,
       title: card.title,
       description: card.description,
       category_id: card.category_id,
+      category_name: card.category_name,
       price_tag: card.price_tag,
     }));
   };
@@ -413,10 +421,10 @@ const BuyerJobList = () => {
           <Text style={[styles.label, styles.coloredText]}>Job List</Text>
           <Image
             style={styles.icon}
-            source={require("../assets/img/logo.png")}
+            source={require('../assets/img/logo.png')}
           />
         </View>
-        <View style={{ alignItems: "center", marginTop: 10 }}>
+        <View style={{ alignItems: 'center', marginTop: 10 }}>
           {cards.filter((c) => c.category_id == selectedCategoryId).length ==
           0 ? (
             <Text style={styles.textRegular}>No jobs in this category</Text>
@@ -428,24 +436,24 @@ const BuyerJobList = () => {
         </View>
 
         <Modal animationType="slide" visible={visible}>
-          <View style={[styles.container, { backgroundColor: "#eee" }]}>
+          <View style={[styles.container, { backgroundColor: '#eee' }]}>
             <Icon
               name="md-close"
               size={35}
               color="#333"
-              style={{ alignSelf: "flex-end", marginRight: 30, marginTop: 10 }}
+              style={{ alignSelf: 'flex-end', marginRight: 30, marginTop: 10 }}
               onPress={() => setVisible(false)}
             ></Icon>
             <Image
               style={styles.modalImage}
-              source={require("../assets/img/logo.png")}
+              source={require('../assets/img/logo.png')}
             ></Image>
             <View
               style={{
                 flex: 2,
-                backgroundColor: "#fff",
-                alignSelf: "stretch",
-                alignItems: "center",
+                backgroundColor: '#fff',
+                alignSelf: 'stretch',
+                alignItems: 'center',
                 borderRadius: 30,
                 marginTop: 30,
                 paddingVertical: 10,
@@ -459,12 +467,12 @@ const BuyerJobList = () => {
                   styles.mediumText,
                 ]}
               >
-                {cardData.category_id}
+                {cardData.category_name}
               </Text>
               <Text
                 style={[styles.textRegular, styles.floatLeft, styles.header]}
               >
-                Title:{" "}
+                Title:{' '}
                 <Text style={[styles.textBold, styles.floatLeft]}>
                   {cardData.title}
                 </Text>
@@ -472,9 +480,9 @@ const BuyerJobList = () => {
               <Text
                 style={[styles.textRegular, styles.floatLeft, styles.header]}
               >
-                Freelancer:{" "}
+                Freelancer:{' '}
                 <Text style={[styles.textBold, styles.floatLeft]}>
-                  {cardData.user_id}
+                  {cardData.freelancer_name}
                 </Text>
               </Text>
               <Text
@@ -504,7 +512,7 @@ const BuyerJobList = () => {
               <View
                 style={{
                   flex: 1,
-                  justifyContent: "flex-end",
+                  justifyContent: 'flex-end',
                   marginBottom: 35,
                 }}
               >
@@ -549,11 +557,11 @@ const SellerDashboard = ({ navigation }) => {
   const [showMyJobsModalVisible, setShowMyJobsModalVisible] = useState(false);
 
   const [lapakData, setLapakData] = useState({
-    id: "",
-    category_id: "",
-    title: "",
-    description: "",
-    price_tag: "",
+    id: '',
+    category_id: '',
+    title: '',
+    description: '',
+    price_tag: '',
   });
 
   useEffect(() => {
@@ -594,9 +602,9 @@ const SellerDashboard = ({ navigation }) => {
     fetchData();
 
     Toast.show({
-      text1: "Fetching...",
-      type: "info",
-      position: "bottom",
+      text1: 'Fetching...',
+      type: 'info',
+      position: 'bottom',
     });
 
     setRefreshing((previousState) => !previousState);
@@ -616,7 +624,7 @@ const SellerDashboard = ({ navigation }) => {
           <Text style={[styles.label, styles.coloredText]}>Dashboard</Text>
           <Image
             style={styles.icon}
-            source={require("../assets/img/logo.png")}
+            source={require('../assets/img/logo.png')}
           />
         </View>
         <View
@@ -628,12 +636,12 @@ const SellerDashboard = ({ navigation }) => {
           ]}
         >
           <Text style={[styles.textRegular, { fontSize: 18 }]}>
-            Hello{" "}
+            Hello{' '}
             <Text
               style={[
                 styles.coloredText,
                 styles.textBold,
-                { textTransform: "capitalize" },
+                { textTransform: 'capitalize' },
               ]}
             >
               {user.name}
@@ -645,7 +653,7 @@ const SellerDashboard = ({ navigation }) => {
           style={[styles.marginalView, styles.paddingHorizontal, styles.w75]}
         >
           <Image
-            source={require("../assets/img/dashboard-seller.png")}
+            source={require('../assets/img/dashboard-seller.png')}
             style={styles.jumbotron}
           ></Image>
         </View>
@@ -656,13 +664,13 @@ const SellerDashboard = ({ navigation }) => {
             onPress={() => setCreateModalVisible(true)}
           ></Button>
           <Modal animationType="slide" visible={createModalVisible}>
-            <View style={[styles.container, { backgroundColor: "#eee" }]}>
+            <View style={[styles.container, { backgroundColor: '#eee' }]}>
               <Icon
                 name="md-close"
                 size={35}
                 color="#333"
                 style={{
-                  alignSelf: "flex-end",
+                  alignSelf: 'flex-end',
                   marginRight: 30,
                   marginTop: 10,
                 }}
@@ -670,14 +678,14 @@ const SellerDashboard = ({ navigation }) => {
               ></Icon>
               <Image
                 style={styles.modalImage}
-                source={require("../assets/img/logo.png")}
+                source={require('../assets/img/logo.png')}
               ></Image>
               <View
                 style={{
                   flex: 2,
-                  backgroundColor: "#fff",
-                  alignSelf: "stretch",
-                  alignItems: "center",
+                  backgroundColor: '#fff',
+                  alignSelf: 'stretch',
+                  alignItems: 'center',
                   borderRadius: 30,
                   marginTop: 30,
                   paddingVertical: 10,
@@ -700,9 +708,9 @@ const SellerDashboard = ({ navigation }) => {
                   <Formik
                     initialValues={{
                       category_id: 1,
-                      title: "",
-                      description: "",
-                      price_tag: "",
+                      title: '',
+                      description: '',
+                      price_tag: '',
                     }}
                     onSubmit={(values, { resetForm }) => {
                       createLapak(values);
@@ -711,13 +719,13 @@ const SellerDashboard = ({ navigation }) => {
                     }}
                     validationSchema={Yup.object().shape({
                       category_id: Yup.number().required(
-                        "Please pick a category"
+                        'Please pick a category'
                       ),
-                      title: Yup.string().required("Title cannot be empty"),
+                      title: Yup.string().required('Title cannot be empty'),
                       description: Yup.string().required(
-                        "Description cannot be empty"
+                        'Description cannot be empty'
                       ),
-                      price_tag: Yup.number().required("Price cannot be empty"),
+                      price_tag: Yup.number().required('Price cannot be empty'),
                     })}
                   >
                     {({
@@ -735,13 +743,12 @@ const SellerDashboard = ({ navigation }) => {
                           <Text style={styles.label}>Title</Text>
                           <TextInput
                             value={values.title}
-                            onChangeText={handleChange("title")}
-                            onBlur={() => setFieldTouched("title")}
+                            onChangeText={handleChange('title')}
+                            onBlur={() => setFieldTouched('title')}
                             style={styles.input}
-                            autoFocus={true}
                           />
                           {touched.title && errors.title && (
-                            <Text style={{ fontSize: 10, color: "red" }}>
+                            <Text style={{ fontSize: 10, color: 'red' }}>
                               {errors.title}
                             </Text>
                           )}
@@ -750,12 +757,12 @@ const SellerDashboard = ({ navigation }) => {
                           <Text style={styles.label}>Description</Text>
                           <TextInput
                             value={values.description}
-                            onChangeText={handleChange("description")}
-                            onBlur={() => setFieldTouched("description")}
+                            onChangeText={handleChange('description')}
+                            onBlur={() => setFieldTouched('description')}
                             style={styles.input}
                           />
                           {touched.description && errors.description && (
-                            <Text style={{ fontSize: 10, color: "red" }}>
+                            <Text style={{ fontSize: 10, color: 'red' }}>
                               {errors.description}
                             </Text>
                           )}
@@ -765,7 +772,7 @@ const SellerDashboard = ({ navigation }) => {
                           <Picker
                             selectedValue={values.category_id}
                             onValueChange={(value) =>
-                              setFieldValue("category_id", value)
+                              setFieldValue('category_id', value)
                             }
                             style={styles.input}
                           >
@@ -777,7 +784,7 @@ const SellerDashboard = ({ navigation }) => {
                             <Picker.Item label="UI/UX" value={6} />
                           </Picker>
                           {touched.category_id && errors.category_id && (
-                            <Text style={{ fontSize: 10, color: "red" }}>
+                            <Text style={{ fontSize: 10, color: 'red' }}>
                               {errors.category_id}
                             </Text>
                           )}
@@ -786,12 +793,12 @@ const SellerDashboard = ({ navigation }) => {
                           <Text style={styles.label}>Price</Text>
                           <TextInput
                             value={values.price_tag}
-                            onChangeText={handleChange("price_tag")}
-                            onBlur={() => setFieldTouched("price_tag")}
+                            onChangeText={handleChange('price_tag')}
+                            onBlur={() => setFieldTouched('price_tag')}
                             style={styles.input}
                           />
                           {touched.price_tag && errors.price_tag && (
-                            <Text style={{ fontSize: 10, color: "red" }}>
+                            <Text style={{ fontSize: 10, color: 'red' }}>
                               {errors.price_tag}
                             </Text>
                           )}
@@ -813,7 +820,7 @@ const SellerDashboard = ({ navigation }) => {
           <Button
             title="Ongoing projects"
             buttonStyle={styles.btnSeller}
-            onPress={() => navigation.navigate("Orders")}
+            onPress={() => navigation.navigate('Orders')}
           ></Button>
           <Button
             title="My projects"
@@ -823,13 +830,13 @@ const SellerDashboard = ({ navigation }) => {
             }
           ></Button>
           <Modal animationType="slide" visible={showMyJobsModalVisible}>
-            <View style={[styles.container, { backgroundColor: "#eee" }]}>
+            <View style={[styles.container, { backgroundColor: '#eee' }]}>
               <Icon
                 name="md-close"
                 size={35}
                 color="#333"
                 style={{
-                  alignSelf: "flex-end",
+                  alignSelf: 'flex-end',
                   marginRight: 30,
                   marginVertical: 10,
                 }}
@@ -847,11 +854,11 @@ const SellerDashboard = ({ navigation }) => {
                   </Text>
                   <Image
                     style={styles.icon}
-                    source={require("../assets/img/logo.png")}
+                    source={require('../assets/img/logo.png')}
                   />
                 </View>
                 <View
-                  style={{ flex: 2, alignItems: "center", marginLeft: -10 }}
+                  style={{ flex: 2, alignItems: 'center', marginLeft: -10 }}
                 >
                   {cards.filter((c) => c.user_id == user.id).length == 0 ? (
                     <Text>No Jobs Found</Text>
@@ -865,13 +872,13 @@ const SellerDashboard = ({ navigation }) => {
             </View>
           </Modal>
           <Modal animationType="slide" visible={updateModalVisible}>
-            <View style={[styles.container, { backgroundColor: "#eee" }]}>
+            <View style={[styles.container, { backgroundColor: '#eee' }]}>
               <Icon
                 name="md-close"
                 size={35}
                 color="#333"
                 style={{
-                  alignSelf: "flex-end",
+                  alignSelf: 'flex-end',
                   marginRight: 30,
                   marginTop: 10,
                 }}
@@ -879,14 +886,14 @@ const SellerDashboard = ({ navigation }) => {
               ></Icon>
               <Image
                 style={styles.modalImage}
-                source={require("../assets/img/logo.png")}
+                source={require('../assets/img/logo.png')}
               ></Image>
               <View
                 style={{
                   flex: 2,
-                  backgroundColor: "#fff",
-                  alignSelf: "stretch",
-                  alignItems: "center",
+                  backgroundColor: '#fff',
+                  alignSelf: 'stretch',
+                  alignItems: 'center',
                   borderRadius: 30,
                   marginTop: 30,
                   paddingVertical: 10,
@@ -907,11 +914,17 @@ const SellerDashboard = ({ navigation }) => {
                   size={35}
                   color="#333"
                   style={{
-                    alignSelf: "flex-end",
+                    alignSelf: 'flex-end',
                     marginRight: 30,
                     marginTop: 10,
                   }}
-                  onPress={() => deleteLapak(lapakData.id)}
+                  onPress={() => {
+                    deleteLapak(lapakData.id);
+                    setUpdateModalVisible((previousState) => !previousState);
+                    setShowMyJobsModalVisible(
+                      (previousState) => !previousState
+                    );
+                  }}
                 ></Icon>
                 <ScrollView
                   style={styles.formContainer}
@@ -929,16 +942,19 @@ const SellerDashboard = ({ navigation }) => {
                       updateLapak(values);
                       resetForm();
                       setUpdateModalVisible((previousState) => !previousState);
+                      setShowMyJobsModalVisible(
+                        (previousState) => !previousState
+                      );
                     }}
                     validationSchema={Yup.object().shape({
                       category_id: Yup.number().required(
-                        "Please pick a category"
+                        'Please pick a category'
                       ),
-                      title: Yup.string().required("Title cannot be empty"),
+                      title: Yup.string().required('Title cannot be empty'),
                       description: Yup.string().required(
-                        "Description cannot be empty"
+                        'Description cannot be empty'
                       ),
-                      price_tag: Yup.number().required("Price cannot be empty"),
+                      price_tag: Yup.number().required('Price cannot be empty'),
                     })}
                   >
                     {({
@@ -956,13 +972,12 @@ const SellerDashboard = ({ navigation }) => {
                           <Text style={styles.label}>Title</Text>
                           <TextInput
                             value={values.title}
-                            onChangeText={handleChange("title")}
-                            onBlur={() => setFieldTouched("title")}
+                            onChangeText={handleChange('title')}
+                            onBlur={() => setFieldTouched('title')}
                             style={styles.input}
-                            autoFocus={true}
                           />
                           {touched.title && errors.title && (
-                            <Text style={{ fontSize: 10, color: "red" }}>
+                            <Text style={{ fontSize: 10, color: 'red' }}>
                               {errors.title}
                             </Text>
                           )}
@@ -971,12 +986,12 @@ const SellerDashboard = ({ navigation }) => {
                           <Text style={styles.label}>Description</Text>
                           <TextInput
                             value={values.description}
-                            onChangeText={handleChange("description")}
-                            onBlur={() => setFieldTouched("description")}
+                            onChangeText={handleChange('description')}
+                            onBlur={() => setFieldTouched('description')}
                             style={styles.input}
                           />
                           {touched.description && errors.description && (
-                            <Text style={{ fontSize: 10, color: "red" }}>
+                            <Text style={{ fontSize: 10, color: 'red' }}>
                               {errors.description}
                             </Text>
                           )}
@@ -986,7 +1001,7 @@ const SellerDashboard = ({ navigation }) => {
                           <Picker
                             selectedValue={values.category_id}
                             onValueChange={(value) =>
-                              setFieldValue("category_id", value)
+                              setFieldValue('category_id', value)
                             }
                             style={styles.input}
                           >
@@ -998,7 +1013,7 @@ const SellerDashboard = ({ navigation }) => {
                             <Picker.Item label="UI/UX" value={6} />
                           </Picker>
                           {touched.category_id && errors.category_id && (
-                            <Text style={{ fontSize: 10, color: "red" }}>
+                            <Text style={{ fontSize: 10, color: 'red' }}>
                               {errors.category_id}
                             </Text>
                           )}
@@ -1007,12 +1022,12 @@ const SellerDashboard = ({ navigation }) => {
                           <Text style={styles.label}>Price</Text>
                           <TextInput
                             value={values.price_tag}
-                            onChangeText={handleChange("price_tag")}
-                            onBlur={() => setFieldTouched("price_tag")}
+                            onChangeText={handleChange('price_tag')}
+                            onBlur={() => setFieldTouched('price_tag')}
                             style={styles.input}
                           />
                           {touched.price_tag && errors.price_tag && (
-                            <Text style={{ fontSize: 10, color: "red" }}>
+                            <Text style={{ fontSize: 10, color: 'red' }}>
                               {errors.price_tag}
                             </Text>
                           )}
@@ -1060,9 +1075,9 @@ const BuyerOrders = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [doneModalVisible, setDoneModalVisible] = useState(false);
   const [transactionDetail, setTransactionDetail] = useState({
-    id: "",
-    title: "",
-    message: "",
+    id: '',
+    title: '',
+    message: '',
   });
 
   useEffect(() => {
@@ -1082,11 +1097,11 @@ const BuyerOrders = () => {
             styles.largeText,
             styles.darkText,
             {
-              alignSelf: "stretch",
+              alignSelf: 'stretch',
               flexGrow: 2,
-              justifyContent: "center",
-              textAlign: "center",
-              backgroundColor: "#96ffb2",
+              justifyContent: 'center',
+              textAlign: 'center',
+              backgroundColor: '#96ffb2',
               paddingTop: 15,
             },
           ]}
@@ -1095,7 +1110,7 @@ const BuyerOrders = () => {
         </Text>
         <Button
           title="Done"
-          buttonStyle={{ backgroundColor: "#3FA578" }}
+          buttonStyle={{ backgroundColor: '#3FA578' }}
           titleStyle={styles.textRegular}
           onPress={() => renderDoneModal(id, title, message)}
         ></Button>
@@ -1126,11 +1141,11 @@ const BuyerOrders = () => {
             styles.largeText,
             styles.darkText,
             {
-              alignSelf: "stretch",
+              alignSelf: 'stretch',
               flexGrow: 2,
-              justifyContent: "center",
-              textAlign: "center",
-              backgroundColor: "#96ffb2",
+              justifyContent: 'center',
+              textAlign: 'center',
+              backgroundColor: '#96ffb2',
               paddingTop: 15,
             },
           ]}
@@ -1139,7 +1154,7 @@ const BuyerOrders = () => {
         </Text>
         <Button
           title="Cancel"
-          buttonStyle={{ backgroundColor: "#3FA578" }}
+          buttonStyle={{ backgroundColor: '#3FA578' }}
           titleStyle={styles.textRegular}
           onPress={() => cancelOrder(id)}
         ></Button>
@@ -1153,9 +1168,9 @@ const BuyerOrders = () => {
     fetchOrders();
 
     Toast.show({
-      text1: "Fetching...",
-      type: "info",
-      position: "bottom",
+      text1: 'Fetching...',
+      type: 'info',
+      position: 'bottom',
     });
 
     setRefreshing((previousState) => !previousState);
@@ -1175,14 +1190,14 @@ const BuyerOrders = () => {
           <Text style={[styles.label, styles.coloredText]}>Orders</Text>
           <Image
             style={styles.icon}
-            source={require("../assets/img/logo.png")}
+            source={require('../assets/img/logo.png')}
           />
         </View>
         <View
           style={[
             {
               flexGrow: 2,
-              alignItems: "center",
+              alignItems: 'center',
             },
           ]}
         >
@@ -1204,13 +1219,13 @@ const BuyerOrders = () => {
                 .map((order, index) => renderOngoingOrders(order, index))
             )}
             <Modal animationType="slide" visible={doneModalVisible}>
-              <View style={[styles.container, { backgroundColor: "#eee" }]}>
+              <View style={[styles.container, { backgroundColor: '#eee' }]}>
                 <Icon
                   name="md-close"
                   size={35}
                   color="#333"
                   style={{
-                    alignSelf: "flex-end",
+                    alignSelf: 'flex-end',
                     marginRight: 30,
                     marginTop: 10,
                   }}
@@ -1220,14 +1235,14 @@ const BuyerOrders = () => {
                 ></Icon>
                 <Image
                   style={styles.modalImage}
-                  source={require("../assets/img/logo.png")}
+                  source={require('../assets/img/logo.png')}
                 ></Image>
                 <View
                   style={{
                     flex: 2,
-                    backgroundColor: "#fff",
-                    alignSelf: "stretch",
-                    alignItems: "center",
+                    backgroundColor: '#fff',
+                    alignSelf: 'stretch',
+                    alignItems: 'center',
                     borderRadius: 30,
                     marginTop: 30,
                     paddingVertical: 10,
@@ -1262,24 +1277,24 @@ const BuyerOrders = () => {
                     Message: {transactionDetail.message}
                   </Text>
                   <Image
-                    source={require("../assets/img/logo.png")}
+                    source={require('../assets/img/logo.png')}
                     style={{
                       width: 200,
                       height: 200,
-                      resizeMode: "contain",
+                      resizeMode: 'contain',
                       marginVertical: 10,
                     }}
                   ></Image>
                   <View
                     style={{
-                      justifyContent: "flex-end",
+                      justifyContent: 'flex-end',
                       flex: 1,
                       marginBottom: 35,
                     }}
                   >
                     <Button
                       title="Done"
-                      buttonStyle={{ width: 300, backgroundColor: "#3FA578" }}
+                      buttonStyle={{ width: 300, backgroundColor: '#3FA578' }}
                       titleStyle={styles.textBold}
                       onPress={() => {
                         doneOrder(transactionDetail.id);
@@ -1345,11 +1360,11 @@ const SellerOrders = () => {
             styles.largeText,
             styles.darkText,
             {
-              alignSelf: "stretch",
+              alignSelf: 'stretch',
               flexGrow: 2,
-              justifyContent: "center",
-              textAlign: "center",
-              backgroundColor: "#96ffb2",
+              justifyContent: 'center',
+              textAlign: 'center',
+              backgroundColor: '#96ffb2',
               paddingTop: 15,
             },
           ]}
@@ -1358,7 +1373,7 @@ const SellerOrders = () => {
         </Text>
         <Button
           title="Submit"
-          buttonStyle={{ backgroundColor: "#3FA578" }}
+          buttonStyle={{ backgroundColor: '#3FA578' }}
           titleStyle={styles.textRegular}
           onPress={() => renderSubmitModal(id)}
         ></Button>
@@ -1385,11 +1400,11 @@ const SellerOrders = () => {
             styles.largeText,
             styles.darkText,
             {
-              alignSelf: "stretch",
+              alignSelf: 'stretch',
               flexGrow: 2,
-              justifyContent: "center",
-              textAlign: "center",
-              backgroundColor: "#96ffb2",
+              justifyContent: 'center',
+              textAlign: 'center',
+              backgroundColor: '#96ffb2',
               paddingTop: 15,
             },
           ]}
@@ -1398,7 +1413,7 @@ const SellerOrders = () => {
         </Text>
         <Button
           title="Accept"
-          buttonStyle={{ backgroundColor: "#3FA578" }}
+          buttonStyle={{ backgroundColor: '#3FA578' }}
           titleStyle={styles.textRegular}
           onPress={() => confirmOrder(id)}
         ></Button>
@@ -1412,9 +1427,9 @@ const SellerOrders = () => {
     fetchOrders();
 
     Toast.show({
-      text1: "Fetching...",
-      type: "info",
-      position: "bottom",
+      text1: 'Fetching...',
+      type: 'info',
+      position: 'bottom',
     });
 
     setRefreshing((previousState) => !previousState);
@@ -1434,14 +1449,14 @@ const SellerOrders = () => {
           <Text style={[styles.label, styles.coloredText]}>Orders</Text>
           <Image
             style={styles.icon}
-            source={require("../assets/img/logo.png")}
+            source={require('../assets/img/logo.png')}
           />
         </View>
         <View
           style={[
             {
               flexGrow: 2,
-              alignItems: "center",
+              alignItems: 'center',
             },
           ]}
         >
@@ -1466,13 +1481,13 @@ const SellerOrders = () => {
                 .map((order, index) => renderOngoingOrders(order, index))
             )}
             <Modal animationType="slide" visible={doneModalVisible}>
-              <View style={[styles.container, { backgroundColor: "#eee" }]}>
+              <View style={[styles.container, { backgroundColor: '#eee' }]}>
                 <Icon
                   name="md-close"
                   size={35}
                   color="#333"
                   style={{
-                    alignSelf: "flex-end",
+                    alignSelf: 'flex-end',
                     marginRight: 30,
                     marginTop: 10,
                   }}
@@ -1482,14 +1497,14 @@ const SellerOrders = () => {
                 ></Icon>
                 <Image
                   style={styles.modalImage}
-                  source={require("../assets/img/logo.png")}
+                  source={require('../assets/img/logo.png')}
                 ></Image>
                 <View
                   style={{
                     flex: 2,
-                    backgroundColor: "#fff",
-                    alignSelf: "stretch",
-                    alignItems: "center",
+                    backgroundColor: '#fff',
+                    alignSelf: 'stretch',
+                    alignItems: 'center',
                     borderRadius: 30,
                     marginTop: 30,
                     paddingVertical: 10,
@@ -1503,7 +1518,7 @@ const SellerOrders = () => {
                     <Formik
                       initialValues={{
                         id: transactionId,
-                        message: "",
+                        message: '',
                       }}
                       onSubmit={(values, { resetForm }) => {
                         submitOrder(values);
@@ -1512,7 +1527,7 @@ const SellerOrders = () => {
                       }}
                       validationSchema={Yup.object().shape({
                         message: Yup.string().required(
-                          "Message cannot be empty"
+                          'Message cannot be empty'
                         ),
                       })}
                     >
@@ -1530,13 +1545,12 @@ const SellerOrders = () => {
                             <Text style={styles.label}>Message</Text>
                             <TextInput
                               value={values.message}
-                              onChangeText={handleChange("message")}
-                              onBlur={() => setFieldTouched("message")}
+                              onChangeText={handleChange('message')}
+                              onBlur={() => setFieldTouched('message')}
                               style={styles.input}
-                              autoFocus={true}
                             />
                             {touched.message && errors.message && (
-                              <Text style={{ fontSize: 10, color: "red" }}>
+                              <Text style={{ fontSize: 10, color: 'red' }}>
                                 {errors.message}
                               </Text>
                             )}
@@ -1544,11 +1558,11 @@ const SellerOrders = () => {
                           <View style={styles.inputContainer}>
                             <Text style={styles.label}>Result</Text>
                             <Image
-                              source={require("../assets/img/logo.png")}
+                              source={require('../assets/img/logo.png')}
                               style={{
                                 width: 200,
                                 height: 200,
-                                resizeMode: "contain",
+                                resizeMode: 'contain',
                                 marginVertical: 10,
                               }}
                             ></Image>
@@ -1624,7 +1638,7 @@ const Settings = () => {
           <Text style={[styles.label, styles.coloredText]}>Settings</Text>
           <Image
             style={styles.icon}
-            source={require("../assets/img/logo.png")}
+            source={require('../assets/img/logo.png')}
           />
         </View>
 
@@ -1635,7 +1649,7 @@ const Settings = () => {
             Profile Settings
           </Text>
           <View
-            style={{ backgroundColor: "#eee", padding: 10, borderRadius: 5 }}
+            style={{ backgroundColor: '#eee', padding: 10, borderRadius: 5 }}
           >
             <Button
               title="Edit Profile"
@@ -1646,13 +1660,13 @@ const Settings = () => {
               }
             ></Button>
             <Modal animationType="slide" visible={editProfileVisible}>
-              <View style={[styles.container, { backgroundColor: "#eee" }]}>
+              <View style={[styles.container, { backgroundColor: '#eee' }]}>
                 <Icon
                   name="md-close"
                   size={35}
                   color="#333"
                   style={{
-                    alignSelf: "flex-end",
+                    alignSelf: 'flex-end',
                     marginRight: 30,
                     marginTop: 10,
                   }}
@@ -1662,14 +1676,14 @@ const Settings = () => {
                 ></Icon>
                 <Image
                   style={styles.modalImage}
-                  source={require("../assets/img/logo.png")}
+                  source={require('../assets/img/logo.png')}
                 ></Image>
                 <View
                   style={{
                     flex: 2,
-                    backgroundColor: "#fff",
-                    alignSelf: "stretch",
-                    alignItems: "center",
+                    backgroundColor: '#fff',
+                    alignSelf: 'stretch',
+                    alignItems: 'center',
                     borderRadius: 30,
                     marginTop: 30,
                     paddingVertical: 10,
@@ -1707,16 +1721,16 @@ const Settings = () => {
                       }}
                       validationSchema={Yup.object().shape({
                         idNumber: Yup.number().required(
-                          "ID Number cannot be empty"
+                          'ID Number cannot be empty'
                         ),
-                        name: Yup.string().required("Name cannot be empty"),
+                        name: Yup.string().required('Name cannot be empty'),
                         email: Yup.string()
-                          .email("Please insert a valid email")
-                          .required("Email cannot be empty"),
+                          .email('Please insert a valid email')
+                          .required('Email cannot be empty'),
                         phone: Yup.string()
-                          .required("Phone number cannot be empty")
-                          .min(11, "Minimal 11 numbers")
-                          .max(13, "Maximal 13 numbers"),
+                          .required('Phone number cannot be empty')
+                          .min(11, 'Minimal 11 numbers')
+                          .max(13, 'Maximal 13 numbers'),
                       })}
                     >
                       {({
@@ -1739,13 +1753,13 @@ const Settings = () => {
                           )}
                           <View style={[styles.level, styles.inputContainer]}>
                             <Text style={[styles.label, { marginLeft: -30 }]}>
-                              {values.isBuyer ? "Buyer" : "Seller"}
+                              {values.isBuyer ? 'Buyer' : 'Seller'}
                             </Text>
                             <Switch
-                              trackColor={{ false: "#333", true: "#c7ffd6" }}
+                              trackColor={{ false: '#333', true: '#c7ffd6' }}
                               ios_backgroundColor="#3e3e3e"
                               onValueChange={(value) =>
-                                setFieldValue("isBuyer", value)
+                                setFieldValue('isBuyer', value)
                               }
                               style={{ marginRight: 30 }}
                               value={values.isBuyer}
@@ -1755,13 +1769,12 @@ const Settings = () => {
                             <Text style={styles.label}>ID Number</Text>
                             <TextInput
                               value={values.idNumber}
-                              onChangeText={handleChange("idNumber")}
-                              onBlur={() => setFieldTouched("idNumber")}
+                              onChangeText={handleChange('idNumber')}
+                              onBlur={() => setFieldTouched('idNumber')}
                               style={styles.input}
-                              autoFocus={true}
                             />
                             {touched.idNumber && errors.idNumber && (
-                              <Text style={{ fontSize: 10, color: "red" }}>
+                              <Text style={{ fontSize: 10, color: 'red' }}>
                                 {errors.idNumber}
                               </Text>
                             )}
@@ -1770,12 +1783,12 @@ const Settings = () => {
                             <Text style={styles.label}>Name</Text>
                             <TextInput
                               value={values.name}
-                              onChangeText={handleChange("name")}
-                              onBlur={() => setFieldTouched("name")}
+                              onChangeText={handleChange('name')}
+                              onBlur={() => setFieldTouched('name')}
                               style={styles.input}
                             />
                             {touched.name && errors.name && (
-                              <Text style={{ fontSize: 10, color: "red" }}>
+                              <Text style={{ fontSize: 10, color: 'red' }}>
                                 {errors.name}
                               </Text>
                             )}
@@ -1784,12 +1797,12 @@ const Settings = () => {
                             <Text style={styles.label}>Email</Text>
                             <TextInput
                               value={values.email}
-                              onChangeText={handleChange("email")}
-                              onBlur={() => setFieldTouched("email")}
+                              onChangeText={handleChange('email')}
+                              onBlur={() => setFieldTouched('email')}
                               style={styles.input}
                             />
                             {touched.email && errors.email && (
-                              <Text style={{ fontSize: 10, color: "red" }}>
+                              <Text style={{ fontSize: 10, color: 'red' }}>
                                 {errors.email}
                               </Text>
                             )}
@@ -1798,12 +1811,12 @@ const Settings = () => {
                             <Text style={styles.label}>Phone</Text>
                             <TextInput
                               value={values.phone}
-                              onChangeText={handleChange("phone")}
-                              onBlur={() => setFieldTouched("phone")}
+                              onChangeText={handleChange('phone')}
+                              onBlur={() => setFieldTouched('phone')}
                               style={styles.input}
                             />
                             {touched.phone && errors.phone && (
-                              <Text style={{ fontSize: 10, color: "red" }}>
+                              <Text style={{ fontSize: 10, color: 'red' }}>
                                 {errors.phone}
                               </Text>
                             )}
@@ -1822,7 +1835,7 @@ const Settings = () => {
                 </View>
               </View>
             </Modal>
-            <Divider style={{ backgroundColor: "#333", marginVertical: 10 }} />
+            <Divider style={{ backgroundColor: '#333', marginVertical: 10 }} />
             <Button
               title="Update Password"
               buttonStyle={styles.btnSettings}
@@ -1832,13 +1845,13 @@ const Settings = () => {
               }
             ></Button>
             <Modal animationType="slide" visible={updatePasswordVisible}>
-              <View style={[styles.container, { backgroundColor: "#eee" }]}>
+              <View style={[styles.container, { backgroundColor: '#eee' }]}>
                 <Icon
                   name="md-close"
                   size={35}
                   color="#333"
                   style={{
-                    alignSelf: "flex-end",
+                    alignSelf: 'flex-end',
                     marginRight: 30,
                     marginTop: 10,
                   }}
@@ -1848,14 +1861,14 @@ const Settings = () => {
                 ></Icon>
                 <Image
                   style={styles.modalImage}
-                  source={require("../assets/img/logo.png")}
+                  source={require('../assets/img/logo.png')}
                 ></Image>
                 <View
                   style={{
                     flex: 2,
-                    backgroundColor: "#fff",
-                    alignSelf: "stretch",
-                    alignItems: "center",
+                    backgroundColor: '#fff',
+                    alignSelf: 'stretch',
+                    alignItems: 'center',
                     borderRadius: 30,
                     marginTop: 30,
                     paddingVertical: 10,
@@ -1877,8 +1890,8 @@ const Settings = () => {
                   >
                     <Formik
                       initialValues={{
-                        password: "",
-                        newPassword: "",
+                        password: '',
+                        newPassword: '',
                       }}
                       onSubmit={(values, { resetForm }) => {
                         updatePassword(values);
@@ -1890,16 +1903,16 @@ const Settings = () => {
                       }}
                       validationSchema={Yup.object().shape({
                         oldPassword: Yup.string().required(
-                          "Password cannot be empty"
+                          'Password cannot be empty'
                         ),
                         newPassword: Yup.string()
-                          .required("Password cannot be empty")
-                          .min(8, "Minimal 8 characters"),
+                          .required('Password cannot be empty')
+                          .min(8, 'Minimal 8 characters'),
                         newPasswordConfirmation: Yup.string()
-                          .required("Password confirmation cannot be empty")
+                          .required('Password confirmation cannot be empty')
                           .test(
-                            "passwords-match",
-                            "passwords must match",
+                            'passwords-match',
+                            'passwords must match',
                             function (value) {
                               return this.parent.newPassword == value;
                             }
@@ -1927,14 +1940,13 @@ const Settings = () => {
                             <Text style={styles.label}>Old Password</Text>
                             <TextInput
                               value={values.oldPassword}
-                              onChangeText={handleChange("oldPassword")}
-                              onBlur={() => setFieldTouched("oldPassword")}
+                              onChangeText={handleChange('oldPassword')}
+                              onBlur={() => setFieldTouched('oldPassword')}
                               style={styles.input}
-                              autoFocus={true}
                               secureTextEntry={true}
                             />
                             {touched.oldPassword && errors.oldPassword && (
-                              <Text style={{ fontSize: 10, color: "red" }}>
+                              <Text style={{ fontSize: 10, color: 'red' }}>
                                 {errors.oldPassword}
                               </Text>
                             )}
@@ -1943,13 +1955,13 @@ const Settings = () => {
                             <Text style={styles.label}>New Password</Text>
                             <TextInput
                               value={values.newPassword}
-                              onChangeText={handleChange("newPassword")}
-                              onBlur={() => setFieldTouched("newPassword")}
+                              onChangeText={handleChange('newPassword')}
+                              onBlur={() => setFieldTouched('newPassword')}
                               style={styles.input}
                               secureTextEntry={true}
                             />
                             {touched.newPassword && errors.newPassword && (
-                              <Text style={{ fontSize: 10, color: "red" }}>
+                              <Text style={{ fontSize: 10, color: 'red' }}>
                                 {errors.newPassword}
                               </Text>
                             )}
@@ -1961,17 +1973,17 @@ const Settings = () => {
                             <TextInput
                               value={values.newPasswordConfirmation}
                               onChangeText={handleChange(
-                                "newPasswordConfirmation"
+                                'newPasswordConfirmation'
                               )}
                               onBlur={() =>
-                                setFieldTouched("newPasswordConfirmation")
+                                setFieldTouched('newPasswordConfirmation')
                               }
                               style={styles.input}
                               secureTextEntry={true}
                             />
                             {touched.newPasswordConfirmation &&
                               errors.newPasswordConfirmation && (
-                                <Text style={{ fontSize: 10, color: "red" }}>
+                                <Text style={{ fontSize: 10, color: 'red' }}>
                                   {errors.newPasswordConfirmation}
                                 </Text>
                               )}
@@ -1999,7 +2011,7 @@ const Settings = () => {
             Reminder Settings
           </Text>
           <View
-            style={{ backgroundColor: "#eee", padding: 10, borderRadius: 5 }}
+            style={{ backgroundColor: '#eee', padding: 10, borderRadius: 5 }}
           >
             <View style={[styles.btnSettings, styles.btnReminder]}>
               <Text
@@ -2008,7 +2020,7 @@ const Settings = () => {
                 Reminder
               </Text>
               <Switch
-                trackColor={{ false: "#333", true: "#c7ffd6" }}
+                trackColor={{ false: '#333', true: '#c7ffd6' }}
                 ios_backgroundColor="#3e3e3e"
                 onValueChange={(value) => toggleReminder(value)}
                 value={reminder}
@@ -2023,7 +2035,7 @@ const Settings = () => {
             About Us
           </Text>
           <View
-            style={{ backgroundColor: "#eee", padding: 10, borderRadius: 5 }}
+            style={{ backgroundColor: '#eee', padding: 10, borderRadius: 5 }}
           >
             <Button
               title="About Us"
@@ -2033,13 +2045,13 @@ const Settings = () => {
             ></Button>
 
             <Modal animationType="slide" visible={aboutVisible}>
-              <View style={[styles.container, { backgroundColor: "#eee" }]}>
+              <View style={[styles.container, { backgroundColor: '#eee' }]}>
                 <Icon
                   name="md-close"
                   size={35}
                   color="#333"
                   style={{
-                    alignSelf: "flex-end",
+                    alignSelf: 'flex-end',
                     marginRight: 30,
                     marginTop: 10,
                   }}
@@ -2049,14 +2061,14 @@ const Settings = () => {
                 ></Icon>
                 <Image
                   style={styles.modalImage}
-                  source={require("../assets/img/logo.png")}
+                  source={require('../assets/img/logo.png')}
                 ></Image>
                 <View
                   style={{
                     flex: 2,
-                    backgroundColor: "#fff",
-                    alignSelf: "stretch",
-                    alignItems: "center",
+                    backgroundColor: '#fff',
+                    alignSelf: 'stretch',
+                    alignItems: 'center',
                     borderRadius: 30,
                     marginTop: 30,
                     paddingVertical: 10,
@@ -2094,58 +2106,58 @@ const Settings = () => {
   );
 };
 
-const { height } = Dimensions.get("screen");
+const { height } = Dimensions.get('screen');
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-    width: "100%",
-    height: Platform.OS === "android" ? height * 1.3 : height,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    height: Platform.OS === 'android' ? height * 1.3 : height,
   },
   scroll: {
     flexGrow: 1,
   },
   level: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignSelf: "stretch",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignSelf: 'stretch',
     paddingHorizontal: 30,
-    alignItems: "center",
+    alignItems: 'center',
     width: 380,
   },
   jumbotron: {
     width: 320,
     height: 200,
     borderRadius: 10,
-    resizeMode: "cover",
+    resizeMode: 'cover',
   },
   icon: {
     width: 50,
     height: 50,
-    resizeMode: "contain",
+    resizeMode: 'contain',
   },
   modalImage: {
     width: 200,
     height: 200,
-    resizeMode: "contain",
+    resizeMode: 'contain',
   },
   label: {
-    fontFamily: "Roboto-Bold",
+    fontFamily: 'Roboto-Bold',
     fontSize: 20,
     letterSpacing: 3,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
   },
   coloredText: {
-    color: "#3FA578",
+    color: '#3FA578',
   },
   greyText: {
-    color: "grey",
+    color: 'grey',
   },
   darkText: {
-    color: "#333",
+    color: '#333',
   },
   marginalView: {
     marginVertical: 20,
@@ -2154,13 +2166,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
   },
   w75: {
-    maxWidth: "75%",
+    maxWidth: '75%',
   },
   floatLeft: {
-    alignSelf: "flex-start",
+    alignSelf: 'flex-start',
   },
   floatRight: {
-    alignSelf: "flex-end",
+    alignSelf: 'flex-end',
   },
   smallText: {
     fontSize: 12,
@@ -2175,16 +2187,16 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
   input: {
-    backgroundColor: "#eee",
+    backgroundColor: '#eee',
     borderRadius: 5,
     padding: 10,
     width: 380,
   },
   searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-evenly",
-    backgroundColor: "#eee",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-evenly',
+    backgroundColor: '#eee',
     padding: 10,
     borderRadius: 10,
   },
@@ -2195,30 +2207,30 @@ const styles = StyleSheet.create({
   btnCard: {
     width: 150,
     height: 100,
-    backgroundColor: "#3FA578",
+    backgroundColor: '#3FA578',
     borderRadius: 5,
     marginRight: 10,
   },
   btnJob: {
     width: 150,
     height: 100,
-    backgroundColor: "#3FA578",
+    backgroundColor: '#3FA578',
     borderRadius: 5,
     marginBottom: 10,
   },
   btnOrder: {
-    backgroundColor: "#3FA578",
+    backgroundColor: '#3FA578',
     borderRadius: 5,
     marginVertical: 10,
     marginHorizontal: 30,
-    alignSelf: "stretch",
+    alignSelf: 'stretch',
     height: 100,
   },
   textRegular: {
-    fontFamily: "Roboto-Regular",
+    fontFamily: 'Roboto-Regular',
   },
   textBold: {
-    fontFamily: "Roboto-Bold",
+    fontFamily: 'Roboto-Bold',
   },
   btnCategory: {
     width: 100,
@@ -2227,67 +2239,67 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   btnSettings: {
-    justifyContent: "flex-start",
-    backgroundColor: "#eee",
+    justifyContent: 'flex-start',
+    backgroundColor: '#eee',
     borderRadius: 5,
     height: 50,
     marginBottom: 5,
   },
   btnLogout: {
-    backgroundColor: "red",
+    backgroundColor: 'red',
     borderRadius: 5,
     padding: 10,
   },
   logoutText: {
-    color: "white",
-    textTransform: "uppercase",
+    color: 'white',
+    textTransform: 'uppercase',
   },
 
   btnSeller: {
-    backgroundColor: "#3FA578",
-    alignSelf: "stretch",
+    backgroundColor: '#3FA578',
+    alignSelf: 'stretch',
     marginBottom: 10,
     padding: 10,
     borderRadius: 5,
   },
   btnReminder: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 10,
   },
   applyButton: {
-    backgroundColor: "#3FA578",
+    backgroundColor: '#3FA578',
   },
   applyButtonText: {
-    color: "#eee",
-    textTransform: "uppercase",
-    fontFamily: "Roboto-Bold",
+    color: '#eee',
+    textTransform: 'uppercase',
+    fontFamily: 'Roboto-Bold',
     fontSize: 20,
   },
   errorContainer: {
-    backgroundColor: "#ffb0bd",
+    backgroundColor: '#ffb0bd',
     padding: 10,
     // marginTop: -15,
     marginBottom: 10,
     borderRadius: 5,
-    alignSelf: "stretch",
+    alignSelf: 'stretch',
   },
   errorMessage: {
-    textTransform: "uppercase",
-    fontFamily: "Roboto-Bold",
-    textAlign: "center",
+    textTransform: 'uppercase',
+    fontFamily: 'Roboto-Bold',
+    textAlign: 'center',
   },
   inputContainer: {
     marginBottom: 25,
   },
   createButton: {
-    backgroundColor: "#3FA578",
+    backgroundColor: '#3FA578',
   },
   createButtonText: {
-    color: "#eee",
-    textTransform: "uppercase",
-    fontFamily: "Roboto-Bold",
+    color: '#eee',
+    textTransform: 'uppercase',
+    fontFamily: 'Roboto-Bold',
     fontSize: 14,
   },
 });
